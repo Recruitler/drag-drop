@@ -1,6 +1,10 @@
-# DragDrop
+# Recruitler's Customized DragDrop CDK Library
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.1.7.
+TODO: 
+- support nested drop lists
+- support signals
+- support virtual scrolling
+- support paginating drag and drop elements
 
 ## Development server
 
