@@ -175,9 +175,11 @@ export class CdkDropList<T = any> implements OnDestroy {
     private _group?: CdkDropListGroup<CdkDropList>,
     @Optional() @Inject(CDK_DRAG_CONFIG) config?: DragDropConfig,
   ) {
-    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+
+    // TODO: remove all mentions of dev mode or integrate the CDK's ngDevMode
+    // if (typeof ngDevMode === 'undefined' || ngDevMode) {
       assertElementNode(element.nativeElement, 'cdkDropList');
-    }
+    // }
 
     this._dropListRef = dragDrop.createDropList(element);
     this._dropListRef.data = this;
@@ -269,7 +271,9 @@ export class CdkDropList<T = any> implements OnDestroy {
         if (typeof drop === 'string') {
           const correspondingDropList = CdkDropList._dropLists.find(list => list.id === drop);
 
-          if (!correspondingDropList && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+          // TODO: remove all mentions of dev mode or integrate the CDK's ngDevMode
+          // if (!correspondingDropList && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+          if (!correspondingDropList) {
             console.warn(`CdkDropList could not find connected drop list with id "${drop}"`);
           }
 

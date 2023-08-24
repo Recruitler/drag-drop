@@ -6,7 +6,7 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
+import { BooleanInput, coerceBooleanProperty } from '@angular/cdk/coercion';
 import {
   Directive,
   ElementRef,
@@ -17,25 +17,27 @@ import {
   Optional,
   SkipSelf,
 } from '@angular/core';
-import {Subject} from 'rxjs';
-import {CDK_DRAG_PARENT} from '../drag-parent';
-import {assertElementNode} from './assertions';
+import { Subject } from 'rxjs';
+import { CDK_DRAG_PARENT } from '../drag-parent';
+import { assertElementNode } from './assertions';
 
 /**
  * Injection token that can be used to reference instances of `CdkDragHandle`. It serves as
  * alternative token to the actual `CdkDragHandle` class which could cause unnecessary
  * retention of the class and its directive metadata.
  */
-export const CDK_DRAG_HANDLE = new InjectionToken<CdkDragHandle>('CdkDragHandle');
+export const CDK_DRAG_HANDLE = new InjectionToken<CdkDragHandle>(
+  'CdkDragHandle'
+);
 
 /** Handle that can be used to drag a CdkDrag instance. */
 @Directive({
   selector: '[cdkDragHandle]',
   standalone: true,
   host: {
-    'class': 'cdk-drag-handle',
+    class: 'cdk-drag-handle',
   },
-  providers: [{provide: CDK_DRAG_HANDLE, useExisting: CdkDragHandle}],
+  providers: [{ provide: CDK_DRAG_HANDLE, useExisting: CdkDragHandle }],
 })
 export class CdkDragHandle implements OnDestroy {
   /** Closest parent draggable instance. */
@@ -57,11 +59,13 @@ export class CdkDragHandle implements OnDestroy {
 
   constructor(
     public element: ElementRef<HTMLElement>,
-    @Inject(CDK_DRAG_PARENT) @Optional() @SkipSelf() parentDrag?: any,
+    @Inject(CDK_DRAG_PARENT) @Optional() @SkipSelf() parentDrag?: any
   ) {
-    if (typeof ngDevMode === 'undefined' || ngDevMode) {
+
+    // TODO: remove all mentions of dev mode or integrate the CDK's ngDevMode
+    // if (typeof ngDevMode === 'undefined' || ngDevMode) {
       assertElementNode(element.nativeElement, 'cdkDragHandle');
-    }
+    // }
 
     this._parentDrag = parentDrag;
   }

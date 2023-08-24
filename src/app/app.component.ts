@@ -1,15 +1,15 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
-import { SortableComponent } from 'projects/sortable/src/public-api';
+import { ExamplesComponent } from './examples/examples.component';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  imports: [SortableComponent, RouterOutlet],
+  imports: [ExamplesComponent, RouterOutlet],
   standalone: true,
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'drag-drop';
+  title = 'Recruitler\'s drag-drop';
 }

@@ -373,7 +373,9 @@ export class CdkDrag<T = any> implements AfterViewInit, OnChanges, OnDestroy {
             (element.parentElement?.closest(this.rootElementSelector) as HTMLElement);
     }
 
-    if (rootElement && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+    // TODO: remove all mentions of dev mode or integrate the CDK's ngDevMode
+    // if (rootElement && (typeof ngDevMode === 'undefined' || ngDevMode)) {
+    if (rootElement) {
       assertElementNode(rootElement, 'cdkDrag');
     }
 
