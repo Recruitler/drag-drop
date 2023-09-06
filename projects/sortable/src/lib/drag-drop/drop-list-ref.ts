@@ -256,6 +256,7 @@ export class DropListRef<T = any> {
     pointerY: number,
     index?: number
   ): void {
+
     this._draggingStarted();
 
     // If sorting is disabled, we want the item to return to its starting
@@ -461,6 +462,14 @@ export class DropListRef<T = any> {
   }
 
   /**
+   * Returns clientRect of this DropListRef
+   */
+  getClientRect() : ClientRect | undefined {
+    return this._clientRect;
+
+  }
+
+  /**
    * Checks whether the user's pointer is close to the edges of either the
    * viewport or the drop list and starts the auto-scroll sequence.
    * @param pointerX User's pointer position along the x axis.
@@ -650,7 +659,33 @@ export class DropListRef<T = any> {
     x: number,
     y: number
   ): DropListRef | undefined {
+// R2M start
+    let siblingContainers = this._siblings.filter((sibling) => sibling._canReceive(item, x, y));
+    
+    let i = 0;
+    console.log("R2M siblingContainers", siblingContainers.length);
+    let distMin = -99999;
+    let nearestContainer = undefined;
+// find the nearest parent of this container
+    for (let container of siblingContainers) {
+      // console.log("R2M", container.element)
+      let top  = container._clientRect?.top ? container._clientRect.top : -99999;
+
+      if (top > distMin) {
+        distMin = top;
+        nearestContainer = container;
+      }
+    }
+
+    if (nearestContainer) {
+      return nearestContainer
+    }
+    else
+      return undefined;
+// R2M end
     return this._siblings.find((sibling) => sibling._canReceive(item, x, y));
+
+
   }
 
   /**

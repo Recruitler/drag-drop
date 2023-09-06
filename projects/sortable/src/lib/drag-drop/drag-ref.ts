@@ -1105,6 +1105,18 @@ export class DragRef<T = any> {
       y
     );
 
+    // R2M started
+    if (newContainer && this._initialContainer._isOverContainer(x, y)) {
+      console.log("R2M", "you are just on initialContainer");
+      let initialRect = this._initialContainer.getClientRect();
+      let newRect = newContainer?.getClientRect();
+      if (newRect && initialRect && initialRect.top > newRect.top) {
+        newContainer = undefined;
+      }
+
+    }
+    // R2M ended
+
     // If we couldn't find a new container to move the item into, and the item has left its
     // initial container, check whether the it's over the initial container. This handles the
     // case where two containers are connected one way and the user tries to undo dragging an
@@ -1114,6 +1126,8 @@ export class DragRef<T = any> {
       this._dropContainer !== this._initialContainer &&
       this._initialContainer._isOverContainer(x, y)
     ) {
+
+      console.log("R2M", "newContainer is undefined ");
       newContainer = this._initialContainer;
     }
 

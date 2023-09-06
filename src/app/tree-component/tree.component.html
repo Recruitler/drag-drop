@@ -3,83 +3,35 @@
     <h2>To do</h2>
     
     <ng-template #recursiveList let-items>
-      <div *ngFor="let item of items">
-        <ng-container *ngIf="!isArray(item); then leaf; else noleaf">
-        </ng-container>
 
-        <ng-template #leaf>
-          <div class="example-box" cdkDrag>
-            <div>{{item}}</div>
-          </div>
-        </ng-template>
+      <div cdkDropList [cdkDropListData]="items" class="example-list" (cdkDropListDropped)="drop($event)"
+        [cdkDropListConnectedTo]="dls">
+        <div *ngFor="let item of items" class="example-box" cdkDrag>
+          <ng-container *ngIf="!isArray(item); then leaf; else noleaf">
+          </ng-container>
 
-        <ng-template #noleaf>
-          <!-- <div class="example-container"> -->
-            <div
-              cdkDropList
-              [cdkDropListData]="item"
-              class="example-list"
-              (cdkDropListDropped)="drop($event)"
-              [cdkDropListConnectedTo]="dls">
-              
+          <ng-template #leaf>
+            <div>
+              {{item}}
+            </div>
+          </ng-template>
+
+          <ng-template #noleaf>
+            <!-- <div class="example-container"> -->
+            <div>
               <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item }"></ng-container>
             </div>
-          <!-- </div> -->
-        </ng-template>
+            <!-- </div> -->
+          </ng-template>
+        </div>
       </div>
+
     </ng-template>
-    <div
-      cdkDropList
-      [cdkDropListData]="todo"
-      class="example-list"
-      (cdkDropListDropped)="drop($event)"
-      [cdkDropListConnectedTo]="dls">
-      <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: todo }"></ng-container>
-    </div>
-
-    
-
-    <!-- <div
-      cdkDropList
-      [cdkDropListData]="todo"
-      class="example-list"
-      (cdkDropListDropped)="drop($event)"
-      [cdkDropListConnectedTo]="dls">
-      <div class="example-box" *ngFor="let item of todo" cdkDrag >
-        <div *ngIf="!isArray(item); else arrayView">{{item}}</div>
-        <ng-template #arrayView>
-            <div class="example-container">
-              <div
-                cdkDropList
-                [cdkDropListData]="item"
-                class="example-list"
-                (cdkDropListDropped)="drop($event)"
-                [cdkDropListConnectedTo]="dls">
-                <div class="example-box" *ngFor="let innerItem of item" cdkDrag>{{innerItem}}</div>
-              </div>
-            </div>
-        </ng-template>
-      </div>
-    </div>
-  </div> -->
+    <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: todo }"></ng-container>
 
   </div>
 
 </div>
-
-<!-- <ng-template #recursiveList let-items>
-  <ul>
-    <li *ngFor="let item of items">
-      {{ item.name }}
-      <ng-container *ngIf="item.children">
-        <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.children }"></ng-container>
-      </ng-container>
-    </li>
-  </ul>
-</ng-template>
-
-<ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: treeData }"></ng-container> -->
-
 
 <!-- Copyright 2019 Google Inc. All Rights Reserved.
     Use of this source code is governed by an MIT-style license that
