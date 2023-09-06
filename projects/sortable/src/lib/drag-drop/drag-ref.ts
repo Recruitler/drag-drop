@@ -251,7 +251,7 @@ export class DragRef<T = any> {
   private _nativeInteractionsEnabled = true;
 
   /** Client rect of the root element when the dragging sequence has started. */
-  private _initialClientRect?: ClientRect;
+  public _initialClientRect?: ClientRect;
 
   /** Cached dimensions of the preview element. Should be read via `_getPreviewRect`. */
   private _previewRect?: ClientRect;
@@ -1127,7 +1127,6 @@ export class DragRef<T = any> {
       this._initialContainer._isOverContainer(x, y)
     ) {
 
-      console.log("R2M", "newContainer is undefined ");
       newContainer = this._initialContainer;
     }
 
@@ -1160,6 +1159,13 @@ export class DragRef<T = any> {
     // Dragging may have been interrupted as a result of the events above.
     if (this.isDragging()) {
       this._dropContainer!._startScrollingIfNecessary(rawX, rawY);
+      // R2M start
+      // check if dragging item is being over the middle of item, then nesting it into item's children
+      // Just now, there is no such step.
+      let nestIndex = this._dropContainer?._getNestIndex(this, x, y, this._pointerDirectionDelta);
+      
+      
+      // R2M end
       this._dropContainer!._sortItem(this, x, y, this._pointerDirectionDelta);
 
       if (this.constrainPosition) {

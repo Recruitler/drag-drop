@@ -418,6 +418,45 @@ export class DropListRef<T = any> {
   }
 
   /**
+   * Checks if an item is inside name field of leaf node of the list
+   * returns the index of list into which DragRef item will be nested
+   * @param item Item to be nested.
+   * @param pointerX Position of the item along the X axis.
+   * @param pointerY Position of the item along the Y axis.
+   * @param pointerDelta Direction in which the pointer is moving along each axis.
+   */
+  _getNestIndex(
+    item: DragRef,
+    pointerX: number,
+    pointerY: number,
+    pointerDelta: { x: number; y: number }
+  ): number {
+    // Don't nest the item if nesting is disabled or it's out of range.
+    // R2M TODO
+    if (
+      this.sortingDisabled ||
+      !this._clientRect ||
+      !isPointerNearClientRect(
+        this._clientRect,
+        DROP_PROXIMITY_THRESHOLD,
+        pointerX,
+        pointerY
+      )
+    ) {
+      return -1;
+    }
+    let i = 0;
+    for (let draggable of this._draggables) {
+      i ++;
+      console.log("R2M draggable's Client Rect ", i , draggable.data,  draggable._initialClientRect);
+      
+    }
+
+
+    return -1;
+  }
+
+  /**
    * Sorts an item inside the container based on its position.
    * @param item Item to be sorted.
    * @param pointerX Position of the item along the X axis.
@@ -464,7 +503,7 @@ export class DropListRef<T = any> {
   /**
    * Returns clientRect of this DropListRef
    */
-  getClientRect() : ClientRect | undefined {
+  getClientRect(): ClientRect | undefined {
     return this._clientRect;
 
   }
@@ -659,17 +698,17 @@ export class DropListRef<T = any> {
     x: number,
     y: number
   ): DropListRef | undefined {
-// R2M start
+    // R2M start
     let siblingContainers = this._siblings.filter((sibling) => sibling._canReceive(item, x, y));
-    
+
     let i = 0;
     console.log("R2M siblingContainers", siblingContainers.length);
     let distMin = -99999;
     let nearestContainer = undefined;
-// find the nearest parent of this container
+    // find the nearest parent of this container
     for (let container of siblingContainers) {
       // console.log("R2M", container.element)
-      let top  = container._clientRect?.top ? container._clientRect.top : -99999;
+      let top = container._clientRect?.top ? container._clientRect.top : -99999;
 
       if (top > distMin) {
         distMin = top;
@@ -682,7 +721,7 @@ export class DropListRef<T = any> {
     }
     else
       return undefined;
-// R2M end
+    // R2M end
     return this._siblings.find((sibling) => sibling._canReceive(item, x, y));
 
 

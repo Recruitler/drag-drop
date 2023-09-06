@@ -2,24 +2,31 @@ import { NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { Component, ViewChild, ViewChildren, QueryList } from '@angular/core';
 import { asapScheduler, asyncScheduler } from 'rxjs';
 
-import { 
-  CdkDragDrop, 
-  CdkDrag, 
-  CdkDragHandle, 
+import {
+  CdkDragDrop,
+  CdkDrag,
+  CdkDragHandle,
   CdkDragPlaceholder,
   CdkDragPreview,
-  CdkDropList, 
-  CdkDropListGroup, 
-  moveItemInArray, 
-  transferArrayItem, 
-  CdkDragEnter, 
-  CdkDragExit, 
+  CdkDropList,
+  CdkDropListGroup,
+  moveItemInArray,
+  transferArrayItem,
+  CdkDragEnter,
+  CdkDragExit,
   CdkDragStart,
-  DragDrop, 
+  DragDrop,
 } from 'projects/sortable/src/lib/drag-drop';
 
+
+export interface DropDownItem {
+  name: string;
+  children?: DropDownItem[];
+}
+
+
 /**
- * @title Drag&Drop connected sorting group
+ * @name Drag&Drop connected sorting group
  */
 @Component({
   selector: 'tree-component',
@@ -41,29 +48,74 @@ import {
 })
 
 export class TreeComponent {
-  todo = [
-    'Get to work',
-    [
-      'Get up',
-      [
-        'A',
-        'B',
-        'C',
-      ],
-      'Brush teeth',
-      'Take a shower',
-      'Check e-mail',
-      'Walk dog'
-    ],
-    [
-      'Preare for work',
-      'Drive to office',
-      'Üark car'
-    ],
-    'Pick up groceries',
-    'Go home',
-    'Fall asleep'
+  public list: DropDownItem[] = [
+    {
+      name: "Section 1",
+      children: []
+    },
+    {
+      name: "Section 2",
+      children: [
+        {
+          name: "Section 2.1",
+          children: []
+        },
+        {
+          name: "Section 2.2",
+          children: []
+        },
+        {
+          name: "Section 2.3",
+          children: []
+        }
+      ]
+    },
+    {
+      name: "Section 3",
+      children: [
+        { name: "Section 3.1", children: [] },
+        {
+          name: "Section 3.2",
+          children: [
+            {
+              name: "Section 3.2.1",
+              children: []
+            },
+            {
+              name: "Section 3.2.2",
+              children: []
+            },
+            {
+              name: "Section 3.2.3",
+              children: [
+                {
+                  name: "Section 3.2.3.1",
+                  children: []
+                },
+                {
+                  name: "Section 3.2.3.2",
+                  children: []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          name: "Section 4",
+          children: []
+        },
+        {
+          name: "Section 5",
+          children: []
+        },
+        {
+          name: "Section 6",
+          children: []
+        },
+      ]
+    }
   ];
+
 
   @ViewChildren(CdkDropList)
   private dlq: QueryList<CdkDropList>;
@@ -71,6 +123,12 @@ export class TreeComponent {
   public dls: CdkDropList[] = [];
 
   drop(event: CdkDragDrop<any>) {
+
+    console.log(event.dropPoint);
+    console.log(event)
+
+
+
     if (event.previousContainer === event.container) {
       moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
@@ -82,6 +140,7 @@ export class TreeComponent {
   }
 
   isArray(item: any): boolean {
+    // console.log("isArray function called");
     return Array.isArray(item);
   }
 
