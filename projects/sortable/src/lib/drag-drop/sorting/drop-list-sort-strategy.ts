@@ -35,6 +35,9 @@ export interface DropListSortStrategyItem {
 export interface DropListSortStrategy<T extends DropListSortStrategyItem> {
   direction: Direction;
   start(items: readonly T[]): void;
+  nest(item: T, nestIndex: number): void;
+  unnest(item: T, nestIndex: number): void;
+  
   sort(
     item: T,
     pointerX: number,
@@ -47,5 +50,6 @@ export interface DropListSortStrategy<T extends DropListSortStrategyItem> {
   reset(): void;
   getActiveItemsSnapshot(): readonly T[];
   getItemIndex(item: T): number;
+  getActiveItem(index : number) : T;
   updateOnScroll(topDifference: number, leftDifference: number): void;
 }

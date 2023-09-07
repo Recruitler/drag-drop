@@ -192,6 +192,10 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
     return { previousIndex: currentIndex, currentIndex: newIndex };
   }
 
+  getActiveItem(index: number) : T {
+    return this._activeDraggables[index];
+  }
+
   /**
    * Called when an item is being moved into the container.
    * @param item Item that was moved into the container.
@@ -244,6 +248,7 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
       newPositionReference &&
       !this._dragDropRegistry.isDragging(newPositionReference)
     ) {
+
       const element = newPositionReference.getRootElement();
       element.parentElement!.insertBefore(placeholder, element);
       activeDraggables.splice(newIndex, 0, item);
@@ -259,6 +264,95 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
     // container. This will cache item positions, but we need to refresh them since the amount
     // of items has changed.
     this._cacheItemPositions();
+  }
+
+  /**
+   * Called when an item is being nested into the another item.
+   * @param item Item that was nested into the target item.
+   * @param pointerX Position of the item along the X axis.
+   * @param pointerY Position of the item along the Y axis.
+   * @param nestIndex Target Index at which the item will be neste. If omitted, the container will try to figure it
+   *   out automatically.
+   */
+  nest(item: T, nestIndex: number): void {
+    const activeDraggables = this._activeDraggables;
+
+    const currentIndex = activeDraggables.indexOf(item);
+
+    console.log("activeDraggables.length" , activeDraggables.length);
+    
+    const placeholder = item.getPlaceholderElement();
+    
+    let nestPositionReference: T | undefined = activeDraggables[nestIndex];
+
+    // If the item at the new position is the same as the item that is being dragged,
+    // it means that we're trying to restore the item to its initial position. In this
+    // case we should use the next item from the list as the reference.
+    // it means that we are trying to nest the item into the same item
+    if (nestPositionReference === item) {
+      return;
+      // newPositionReference = activeDraggables[newIndex + 1];
+    }
+
+    
+    // Don't use items that are being dragged as a reference, because
+    // their element has been moved down to the bottom of the body.
+    if (
+      nestPositionReference &&
+      !this._dragDropRegistry.isDragging(nestPositionReference)
+    ) {
+
+      const element = nestPositionReference.getRootElement();
+      element!.appendChild(placeholder);
+    }
+
+    // The transform needs to be cleared so it doesn't throw off the measurements.
+    placeholder.style.transform = '';
+
+    // Note that usually `start` is called together with `enter` when an item goes into a new
+    // container. This will cache item positions, but we need to refresh them since the amount
+    // of items has changed.
+  }
+
+  unnest(item: T, nestIndex: number): void {
+    const activeDraggables = this._activeDraggables;
+    
+    const currentIndex = activeDraggables.indexOf(item);
+
+    nestIndex = nestIndex >= currentIndex ? nestIndex + 1 : nestIndex;
+
+    const placeholder = item.getPlaceholderElement();
+    
+    let nestPositionReference: T | undefined = activeDraggables[nestIndex];
+
+    // If the item at the new position is the same as the item that is being dragged,
+    // it means that we're trying to restore the item to its initial position. In this
+    // case we should use the next item from the list as the reference.
+    // it means that we are trying to nest the item into the same item
+    if (nestPositionReference === item) {
+      return;
+      // newPositionReference = activeDraggables[newIndex + 1];
+    }
+
+    
+    // Don't use items that are being dragged as a reference, because
+    // their element has been moved down to the bottom of the body.
+    if (
+      nestPositionReference &&
+      !this._dragDropRegistry.isDragging(nestPositionReference)
+    ) {
+
+      const element = nestPositionReference.getRootElement();
+      element.removeChild(element.lastChild as Node);
+      // element!.appendChild(placeholder);
+    }
+
+    // The transform needs to be cleared so it doesn't throw off the measurements.
+    placeholder.style.transform = '';
+
+    // Note that usually `start` is called together with `enter` when an item goes into a new
+    // container. This will cache item positions, but we need to refresh them since the amount
+    // of items has changed.
   }
 
   /** Sets the items that are currently part of the list. */
@@ -446,6 +540,14 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
         ? pointerX <= firstItemRect.left
         : pointerY <= firstItemRect.top;
     }
+  }
+
+  /**
+   * 
+   * @returns ClientRect values of all items
+   */
+  public getItemBoundaries() : ClientRect[] {
+    return this._itemPositions.map(({drag, clientRect}) => clientRect);
   }
 
   /**

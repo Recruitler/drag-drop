@@ -28,7 +28,7 @@ import {
 import {Directionality} from '@angular/cdk/bidi';
 import {ScrollDispatcher} from '@angular/cdk/scrolling';
 import {CDK_DROP_LIST, CdkDrag} from './drag';
-import {CdkDragDrop, CdkDragEnter, CdkDragExit, CdkDragSortEvent} from '../drag-events';
+import {CdkDragDrop, CdkDragEnter, CdkDragNest,  CdkDragExit, CdkDragSortEvent} from '../drag-events';
 import {CDK_DROP_LIST_GROUP, CdkDropListGroup} from './drop-list-group';
 import {DropListRef} from '../drop-list-ref';
 import {DragRef} from '../drag-ref';
@@ -131,7 +131,14 @@ export class CdkDropList<T = any> implements OnDestroy {
   /** Number of pixels to scroll for each frame when auto-scrolling an element. */
   @Input('cdkDropListAutoScrollStep')
   autoScrollStep: NumberInput;
+// R2M start
+  @Input('cdkDropListNestEnabled')
+  nestEnabled: BooleanInput;
 
+  @Input('cdkDropListNestThreshold')
+  nestThreshold: NumberInput;
+
+// R2M end
   /** Emits when the user drops an item inside the container. */
   @Output('cdkDropListDropped')
   readonly dropped: EventEmitter<CdkDragDrop<T, any>> = new EventEmitter<CdkDragDrop<T, any>>();
@@ -142,6 +149,10 @@ export class CdkDropList<T = any> implements OnDestroy {
   @Output('cdkDropListEntered')
   readonly entered: EventEmitter<CdkDragEnter<T>> = new EventEmitter<CdkDragEnter<T>>();
 
+// R2M start
+  @Output('cdkDropListNested')
+  readonly nested: EventEmitter<CdkDragNest<T>> = new EventEmitter<CdkDragNest<T>>();
+// R2M end
   /**
    * Emits when the user removes an item from the container
    * by dragging it into another container.
@@ -309,6 +320,10 @@ export class CdkDropList<T = any> implements OnDestroy {
       ref.sortingDisabled = coerceBooleanProperty(this.sortingDisabled);
       ref.autoScrollDisabled = coerceBooleanProperty(this.autoScrollDisabled);
       ref.autoScrollStep = coerceNumberProperty(this.autoScrollStep, 2);
+      // R2M start
+      ref.nestEnabled = coerceBooleanProperty(this.nestEnabled);
+      ref.nestThreshold = coerceNumberProperty(this.nestThreshold, 0.5);
+      // R2M end
       ref
         .connectedTo(siblings.filter(drop => drop && drop !== this).map(list => list._dropListRef))
         .withOrientation(this.orientation);
@@ -329,7 +344,15 @@ export class CdkDropList<T = any> implements OnDestroy {
         currentIndex: event.currentIndex,
       });
     });
-
+// R2M start
+    ref.nested.subscribe(event => {
+      this.nested.emit({
+        container: this,
+        item: event.item.data,
+        nestIndex: event.nestIndex
+      });
+    });
+// R2M end
     ref.exited.subscribe(event => {
       this.exited.emit({
         container: this,
@@ -358,6 +381,7 @@ export class CdkDropList<T = any> implements OnDestroy {
         distance: dropEvent.distance,
         dropPoint: dropEvent.dropPoint,
         event: dropEvent.event,
+        nestInfo: dropEvent.nestInfo
       });
 
       // Mark for check since all of these events run outside of change

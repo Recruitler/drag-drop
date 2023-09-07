@@ -16,6 +16,7 @@ import {
   CdkDragExit,
   CdkDragStart,
   DragDrop,
+  CdkDragNest,
 } from 'projects/sortable/src/lib/drag-drop';
 
 
@@ -24,6 +25,7 @@ export interface DropDownItem {
   children?: DropDownItem[];
 }
 
+const TAG = "tree.component.ts";
 
 /**
  * @name Drag&Drop connected sorting group
@@ -51,69 +53,69 @@ export class TreeComponent {
   public list: DropDownItem[] = [
     {
       name: "Section 1",
-      children: []
+
     },
     {
       name: "Section 2",
       children: [
         {
           name: "Section 2.1",
-          children: []
+
         },
         {
           name: "Section 2.2",
-          children: []
+
         },
         {
           name: "Section 2.3",
-          children: []
+
         }
       ]
     },
     {
       name: "Section 3",
       children: [
-        { name: "Section 3.1", children: [] },
+        { name: "Section 3.1", },
         {
           name: "Section 3.2",
           children: [
             {
               name: "Section 3.2.1",
-              children: []
+
             },
             {
               name: "Section 3.2.2",
-              children: []
+
             },
             {
               name: "Section 3.2.3",
               children: [
                 {
                   name: "Section 3.2.3.1",
-                  children: []
+
                 },
                 {
                   name: "Section 3.2.3.2",
-                  children: []
+
                 }
               ]
             }
           ]
         },
-        {
-          name: "Section 4",
-          children: []
-        },
-        {
-          name: "Section 5",
-          children: []
-        },
-        {
-          name: "Section 6",
-          children: []
-        },
       ]
-    }
+    },
+    {
+      name: "Section 4",
+
+    },
+    {
+      name: "Section 5",
+
+    },
+    {
+      name: "Section 6",
+
+    },
   ];
 
 
@@ -124,19 +126,67 @@ export class TreeComponent {
 
   drop(event: CdkDragDrop<any>) {
 
-    console.log(event.dropPoint);
-    console.log(event)
-
-
 
     if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      let nestInfo = event.nestInfo;
+
+      console.log(TAG, nestInfo);
+      if (nestInfo) {
+        let listData: DropDownItem[] = event.container.data;
+
+        console.log(TAG, listData);
+
+        if (nestInfo.nestIndex < listData.length && nestInfo.nestIndex >= 0) {
+          let targetItem = listData[nestInfo.nestIndex];
+          let targetChildren = targetItem?.children ? targetItem.children : [];
+          // targetChildren.push({name: ""});
+          transferArrayItem(event.container.data,
+            targetChildren,
+            event.previousIndex,
+            targetChildren.length);
+
+          targetItem.children = targetChildren;
+          console.log(TAG, targetChildren);
+
+        }
+      } else {
+        moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+      }
     } else {
-      transferArrayItem(event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex);
+      let nestInfo = event.nestInfo;
+
+      console.log(TAG, nestInfo);
+
+      if (nestInfo) {
+        let listData: DropDownItem[] = event.container.data;
+
+        console.log(TAG, listData);
+
+        if (nestInfo.nestIndex < listData.length && nestInfo.nestIndex >= 0) {
+          let targetItem = listData[nestInfo.nestIndex];
+          let targetChildren = targetItem?.children ? targetItem.children : [];
+          // targetChildren.push({name: ""});
+          transferArrayItem(event.previousContainer.data,
+            targetChildren,
+            event.previousIndex,
+            targetChildren.length);
+
+          targetItem.children = targetChildren;
+          console.log(TAG, targetChildren);
+
+        }
+      } else {
+        transferArrayItem(event.previousContainer.data,
+          event.container.data,
+          event.previousIndex,
+          event.currentIndex);
+      }
+
     }
+  }
+
+  nest(event: CdkDragNest<any>) {
+    console.log("R2M", "nest ", event);
   }
 
   isArray(item: any): boolean {

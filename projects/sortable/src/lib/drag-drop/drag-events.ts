@@ -8,6 +8,7 @@
 
 import type {CdkDrag} from './directives/drag';
 import type {CdkDropList} from './directives/drop-list';
+import { DragNestInfo } from './drag-ref';
 
 /** Event emitted when the user starts dragging a draggable. */
 export interface CdkDragStart<T = any> {
@@ -47,6 +48,16 @@ export interface CdkDragEnter<T = any, I = T> {
   currentIndex: number;
 }
 
+/** Event emitted when the user moves an item into a new drop container. */
+export interface CdkDragNest<T = any, I = T> {
+  /** Container into which the user has moved the item. */
+  container: CdkDropList<T>;
+  /** Item that was moved into the container. */
+  item: CdkDrag<I>;
+  /** Index at which the item has entered the container. */
+  nestIndex: number;
+}
+
 /**
  * Event emitted when the user removes an item from a
  * drop container by moving it into another one.
@@ -78,6 +89,8 @@ export interface CdkDragDrop<T, O = T, I = any> {
   dropPoint: {x: number; y: number};
   /** Native event that caused the drop event. */
   event: MouseEvent | TouchEvent;
+  /** Nest Info for Drag Action */
+  nestInfo: DragNestInfo | null | undefined;
 }
 
 /** Event emitted as the user is dragging a draggable item. */
