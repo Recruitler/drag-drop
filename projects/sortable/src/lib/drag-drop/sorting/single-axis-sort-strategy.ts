@@ -22,6 +22,7 @@ import {
   DropListSortStrategyItem,
   SortPredicate,
 } from './drop-list-sort-strategy';
+import { deepCloneNode } from '../dom/clone-node';
 
 /**
  * Entry in the position cache for draggable items.
@@ -68,7 +69,7 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
   constructor(
     private _element: HTMLElement | ElementRef<HTMLElement>,
     private _dragDropRegistry: DragDropRegistry<T, unknown>
-  ) {}
+  ) { }
 
   /**
    * Keeps track of the item that was last swapped with the dragged item, as well as what direction
@@ -192,6 +193,10 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
     return { previousIndex: currentIndex, currentIndex: newIndex };
   }
 
+  getActiveItem(index: number): T {
+    return this._itemPositions[index].drag;
+  }
+
   /**
    * Called when an item is being moved into the container.
    * @param item Item that was moved into the container.
@@ -204,8 +209,8 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
     const newIndex =
       index == null || index < 0
         ? // We use the coordinates of where the item entered the drop
-          // zone to figure out at which index it should be inserted.
-          this._getItemIndexFromPointerPosition(item, pointerX, pointerY)
+        // zone to figure out at which index it should be inserted.
+        this._getItemIndexFromPointerPosition(item, pointerX, pointerY)
         : index;
 
     const activeDraggables = this._activeDraggables;
@@ -244,6 +249,7 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
       newPositionReference &&
       !this._dragDropRegistry.isDragging(newPositionReference)
     ) {
+
       const element = newPositionReference.getRootElement();
       element.parentElement!.insertBefore(placeholder, element);
       activeDraggables.splice(newIndex, 0, item);
@@ -259,6 +265,95 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
     // container. This will cache item positions, but we need to refresh them since the amount
     // of items has changed.
     this._cacheItemPositions();
+  }
+
+  /**
+   * Called when an item is being nested into the another item.
+   * @param item Item that was nested into the target item.
+   * @param pointerX Position of the item along the X axis.
+   * @param pointerY Position of the item along the Y axis.
+   * @param nestIndex Target Index at which the item will be neste. If omitted, the container will try to figure it
+   *   out automatically.
+   */
+  nest(item: T, nestIndex: number): void {
+
+    const placeholder = item.getPlaceholderElement();
+
+    
+    let nestPositionReference: T | undefined = this._itemPositions[nestIndex].drag;
+
+    // If the item at the new position is the same as the item that is being dragged,
+    // it means that we're trying to restore the item to its initial position. In this
+    // case we should use the next item from the list as the reference.
+    // it means that we are trying to nest the item into the same item
+    if (nestPositionReference === item) {
+      return;
+    }
+
+
+    // Don't use items that are being dragged as a reference, because
+    // their element has been moved down to the bottom of the body.
+    if (
+      nestPositionReference &&
+      !this._dragDropRegistry.isDragging(nestPositionReference)
+    ) {
+
+      const element = nestPositionReference.getRootElement();
+
+      element.appendChild(placeholder);
+      // element!.insertBefore(placeholder, element.children[1]);
+    }
+
+    // The transform needs to be cleared so it doesn't throw off the measurements.
+    placeholder.style.transform = '';
+    // this._cacheItemPositions();
+    // Note that usually `start` is called together with `enter` when an item goes into a new
+    // container. This will cache item positions, but we need to refresh them since the amount
+    // of items has changed.
+  }
+
+  unnest(item: T, nestIndex: number): void {
+    const activeDraggables = this._activeDraggables;
+
+    const currentIndex = activeDraggables.indexOf(item);
+
+    const placeholder = item.getPlaceholderElement();
+
+
+
+    let nestPositionReference: T | undefined = activeDraggables[nestIndex];
+
+    // If the item at the new position is the same as the item that is being dragged,
+    // it means that we're trying to restore the item to its initial position. In this
+    // case we should use the next item from the list as the reference.
+    // it means that we are trying to nest the item into the same item
+    if (nestPositionReference === item) {
+      return;
+      // newPositionReference = activeDraggables[newIndex + 1];
+    }
+
+
+    // Don't use items that are being dragged as a reference, because
+    // their element has been moved down to the bottom of the body.
+    if (
+      nestPositionReference &&
+      !this._dragDropRegistry.isDragging(nestPositionReference)
+    ) {
+
+      const element = nestPositionReference.getRootElement();
+      console.log('element', element.innerHTML);
+      element.removeChild(element.lastChild as Node);
+      console.log('element', element.innerHTML);
+
+      // element!.appendChild(placeholder);
+    }
+
+    // The transform needs to be cleared so it doesn't throw off the measurements.
+    placeholder.style.transform = '';
+
+    // Note that usually `start` is called together with `enter` when an item goes into a new
+    // container. This will cache item positions, but we need to refresh them since the amount
+    // of items has changed.
   }
 
   /** Sets the items that are currently part of the list. */
@@ -449,6 +544,14 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
   }
 
   /**
+   * 
+   * @returns ClientRect values of all items
+   */
+  public getItemBoundaries(): ClientRect[] {
+    return this._itemPositions.map(({ drag, clientRect }) => clientRect);
+  }
+
+  /**
    * Gets the index of an item in the drop container, based on the position of the user's pointer.
    * @param item Item that is being sorted.
    * @param pointerX Position of the user's pointer along the X axis.
@@ -485,11 +588,11 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
 
       return isHorizontal
         ? // Round these down since most browsers report client rects with
-          // sub-pixel precision, whereas the pointer coordinates are rounded to pixels.
-          pointerX >= Math.floor(clientRect.left) &&
-            pointerX < Math.floor(clientRect.right)
+        // sub-pixel precision, whereas the pointer coordinates are rounded to pixels.
+        pointerX >= Math.floor(clientRect.left) &&
+        pointerX < Math.floor(clientRect.right)
         : pointerY >= Math.floor(clientRect.top) &&
-            pointerY < Math.floor(clientRect.bottom);
+        pointerY < Math.floor(clientRect.bottom);
     });
 
     return index === -1 || !this._sortPredicate(index, item) ? -1 : index;

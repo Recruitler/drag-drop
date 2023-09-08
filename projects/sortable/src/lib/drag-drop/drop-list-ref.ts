@@ -14,12 +14,13 @@ import { _getShadowRoot } from '@angular/cdk/platform';
 import { Subject, Subscription, interval, animationFrameScheduler } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { DragDropRegistry } from './drag-drop-registry';
-import type { DragRef, Point } from './drag-ref';
+import type { DragRef, DragNestInfo, Point } from './drag-ref';
 import { isPointerNearClientRect, isInsideClientRect } from './dom/client-rect';
 import { ParentPositionTracker } from './dom/parent-position-tracker';
 import { DragCSSStyleDeclaration } from './dom/styling';
 import { DropListSortStrategy } from './sorting/drop-list-sort-strategy';
 import { SingleAxisSortStrategy } from './sorting/single-axis-sort-strategy';
+import { CdkDrag, CdkDropList } from './public-api';
 
 /**
  * Proximity, as a ratio to width/height, at which a
@@ -79,6 +80,12 @@ export class DropListRef<T = any> {
   /** Number of pixels to scroll for each frame when auto-scrolling an element. */
   autoScrollStep: number = 2;
 
+  // R2M start
+  nestEnabled: boolean = true;
+
+  nestThreshold: number = 0.5;
+  // R2M end
+
   /**
    * Function that is used to determine whether an item
    * is allowed to be moved into a drop container.
@@ -107,6 +114,18 @@ export class DropListRef<T = any> {
    */
   readonly exited = new Subject<{ item: DragRef; container: DropListRef }>();
 
+  // R2M start
+  /**
+   * Emits when the user has moved a new drag item into this container.
+   */
+  readonly nested = new Subject<{
+    item: DragRef;
+    container: DropListRef;
+    nestIndex: number
+  }>();
+  // R2M end
+
+
   /** Emits when the user drops an item inside the container. */
   readonly dropped = new Subject<{
     item: DragRef;
@@ -118,6 +137,7 @@ export class DropListRef<T = any> {
     distance: Point;
     dropPoint: Point;
     event: MouseEvent | TouchEvent;
+    nestInfo: DragNestInfo | null | undefined
   }>();
 
   /** Emits as the user is swapping items while actively dragging. */
@@ -220,6 +240,9 @@ export class DropListRef<T = any> {
     this._viewportScrollSubscription.unsubscribe();
     this.beforeStarted.complete();
     this.entered.complete();
+    // R2M start
+    this.nested.complete();
+    // R2M end
     this.exited.complete();
     this.dropped.complete();
     this.sorted.complete();
@@ -256,6 +279,7 @@ export class DropListRef<T = any> {
     pointerY: number,
     index?: number
   ): void {
+
     this._draggingStarted();
 
     // If sorting is disabled, we want the item to return to its starting
@@ -288,6 +312,16 @@ export class DropListRef<T = any> {
     this.exited.next({ item, container: this });
   }
 
+  // R2M start
+  _unnestIfNecessary(item: DragRef): void {
+    if (item.nestInfo) {
+      let targetItem = this._draggables[item.nestInfo.nestIndex];
+      this._sortStrategy.unnest(item, this._sortStrategy.getItemIndex(targetItem));
+      item.nestInfo = null;
+    }
+  }
+  // R2M end
+
   /**
    * Drops an item into this container.
    * @param item Item being dropped into the container.
@@ -309,7 +343,8 @@ export class DropListRef<T = any> {
     isPointerOverContainer: boolean,
     distance: Point,
     dropPoint: Point,
-    event: MouseEvent | TouchEvent = {} as any
+    event: MouseEvent | TouchEvent = {} as any,
+    nestInfo: DragNestInfo | null | undefined // added by R2M for nesting item
   ): void {
     this._reset();
     this.dropped.next({
@@ -322,6 +357,7 @@ export class DropListRef<T = any> {
       distance,
       dropPoint,
       event,
+      nestInfo
     });
   }
 
@@ -417,6 +453,84 @@ export class DropListRef<T = any> {
   }
 
   /**
+   * create DropList inside an element of a list item if nessary,
+   * nest DragRef item into this created DropList
+   * @param item 
+   * @param nestIndex 
+   */
+  _nestItem(item: DragRef, nestIndex: number): void {
+    let targetItem = this._draggables[nestIndex];
+    this._sortStrategy.nest(item, this._sortStrategy.getItemIndex(targetItem));
+
+    this.nested.next({
+      item,
+      container: this,
+      nestIndex: nestIndex,
+    });
+    // R2M end
+  }
+
+  /**
+   * Checks if an item is inside name field of leaf node of the list
+   * returns the index of list into which DragRef item will be nested
+   * @param item Item to be nested.
+   * @param pointerX Position of the item along the X axis.
+   * @param pointerY Position of the item along the Y axis.
+   * @param pointerDelta Direction in which the pointer is moving along each axis.
+   */
+  _getNestIndex(
+    item: DragRef,
+    pointerX: number,
+    pointerY: number,
+    previewRect: ClientRect,
+    pointerDelta: { x: number; y: number }
+  ): number {
+    // threshold value of left position of pointer for nesting item. 
+    // threshold * left + (1 - threshold) * right < pointer's left ===> NESTING!!!!
+    let thresholdNest = 0.5;
+
+    // Don't nest the item if nesting is disabled or it's out of range.
+
+    if (
+      !this.nestEnabled ||
+      !this._clientRect ||
+      !isPointerNearClientRect(
+        this._clientRect,
+        DROP_PROXIMITY_THRESHOLD,
+        pointerX,
+        pointerY
+      )
+    ) {
+      return -1;
+    }
+
+    let currentIndex = this._sortStrategy.getItemIndex(item);
+
+    // let isVertical = (this._sortStrategy as SingleAxisSortStrategy<DragRef>).orientation === 'vertical';
+    let isVertical = true;
+    let itemRects = (this._sortStrategy as SingleAxisSortStrategy<DragRef>).getItemBoundaries();
+    let index = isVertical ? itemRects.findIndex((rect, index) => {
+      return index !== currentIndex && rect.top < pointerY && rect.bottom > pointerY
+    }) : itemRects.findIndex((rect, index) => {
+      return index !== currentIndex && rect.left < pointerX && rect.right > pointerX
+    });
+
+    if (index == -1)
+      return -1;
+    
+    if (isVertical && previewRect.x > itemRects[index].left) {
+      return this._draggables.indexOf(this._sortStrategy.getActiveItem(index));
+
+    }
+
+    if (!isVertical && pointerX < itemRects[index].left * thresholdNest + itemRects[index].right * (1 - thresholdNest)) {
+      return index;
+    }
+
+    return -1;
+  }
+
+  /**
    * Sorts an item inside the container based on its position.
    * @param item Item to be sorted.
    * @param pointerX Position of the item along the X axis.
@@ -458,6 +572,14 @@ export class DropListRef<T = any> {
         item,
       });
     }
+  }
+
+  /**
+   * Returns clientRect of this DropListRef
+   */
+  getClientRect(): ClientRect | undefined {
+    return this._clientRect;
+
   }
 
   /**
@@ -650,7 +772,27 @@ export class DropListRef<T = any> {
     x: number,
     y: number
   ): DropListRef | undefined {
-    return this._siblings.find((sibling) => sibling._canReceive(item, x, y));
+    // R2M start
+    let siblingContainers = this._siblings.filter((sibling) => sibling._canReceive(item, x, y));
+
+    let distMin = -99999;
+    let nearestContainer = undefined;
+    // find the nearest parent of this container
+    for (let container of siblingContainers) {
+      // console.log("R2M", container.element)
+      let top = container._clientRect?.top ? container._clientRect.top : -99999;
+
+      if (top > distMin) {
+        distMin = top;
+        nearestContainer = container;
+      }
+    }
+
+    return nearestContainer;
+    // R2M end
+    // return this._siblings.find((sibling) => sibling._canReceive(item, x, y));
+
+
   }
 
   /**

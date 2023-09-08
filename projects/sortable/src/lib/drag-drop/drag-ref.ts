@@ -39,6 +39,7 @@ import { getTransformTransitionDurationInMs } from './dom/transition-duration';
 import { getMutableClientRect, adjustClientRect } from './dom/client-rect';
 import { ParentPositionTracker } from './dom/parent-position-tracker';
 import { deepCloneNode } from './dom/clone-node';
+import { CdkDrag } from './public-api';
 
 /** Object that can be used to configure the behavior of DragRef. */
 export interface DragRefConfig {
@@ -60,6 +61,19 @@ export interface DragRefConfig {
   /** Ref that the current drag item is nested in. */
   parentDragRef?: DragRef;
 }
+
+
+// R2M start
+/**
+ * Information for nesting item.
+ * nestIndex means the index of container into which DragRef item will be nested into
+ */
+export interface DragNestInfo {
+  nestIndex: number,
+
+}
+// R2M end
+
 
 /** Options that can be used to bind a passive event listener. */
 const passiveEventListenerOptions = normalizePassiveListenerOptions({
@@ -251,7 +265,7 @@ export class DragRef<T = any> {
   private _nativeInteractionsEnabled = true;
 
   /** Client rect of the root element when the dragging sequence has started. */
-  private _initialClientRect?: ClientRect;
+  public _initialClientRect?: ClientRect;
 
   /** Cached dimensions of the preview element. Should be read via `_getPreviewRect`. */
   private _previewRect?: ClientRect;
@@ -278,7 +292,7 @@ export class DragRef<T = any> {
   private _direction: Direction = 'ltr';
 
   /** Ref that the current drag item is nested in. */
-  private _parentDragRef: DragRef<unknown> | null;
+  public _parentDragRef: DragRef<unknown> | null;
 
   /**
    * Cached shadow root that the element is placed in. `null` means that the element isn't in
@@ -298,6 +312,11 @@ export class DragRef<T = any> {
 
   /** Class to be added to the preview element. */
   previewClass: string | string[] | undefined;
+
+  // R2M start
+  nestInfo: DragNestInfo | null | undefined;
+
+  // R2M end
 
   /** Whether starting to drag this element is disabled. */
   get disabled(): boolean {
@@ -362,6 +381,7 @@ export class DragRef<T = any> {
     dropPoint: Point;
     isPointerOverContainer: boolean;
     event: MouseEvent | TouchEvent;
+    nestInfo: DragNestInfo | null | undefined
   }>();
 
   /**
@@ -573,7 +593,7 @@ export class DragRef<T = any> {
       this._previewTemplate =
       this._anchor =
       this._parentDragRef =
-        null!;
+      null!;
   }
 
   /** Checks whether the element is currently being dragged. */
@@ -866,6 +886,7 @@ export class DragRef<T = any> {
     }
   }
 
+
   /** Starts the dragging sequence. */
   private _startDragSequence(event: MouseEvent | TouchEvent) {
     if (isTouchEvent(event)) {
@@ -1014,13 +1035,13 @@ export class DragRef<T = any> {
       previewTemplate && previewTemplate.template && !previewTemplate.matchSize
         ? { x: 0, y: 0 }
         : this._getPointerPositionInElement(
-            this._initialClientRect,
-            referenceElement,
-            event
-          );
+          this._initialClientRect,
+          referenceElement,
+          event
+        );
     const pointerPosition =
       (this._pickupPositionOnPage =
-      this._lastKnownPointerPosition =
+        this._lastKnownPointerPosition =
         this._getPointerPositionOnPage(event));
     this._pointerDirectionDelta = { x: 0, y: 0 };
     this._pointerPositionAtLastDirectionChange = {
@@ -1046,7 +1067,7 @@ export class DragRef<T = any> {
       this._boundaryRect =
       this._previewRect =
       this._initialTransform =
-        undefined;
+      undefined;
 
     // Re-enter the NgZone since we bound `document` events on the outside.
     this._ngZone.run(() => {
@@ -1065,6 +1086,8 @@ export class DragRef<T = any> {
         dropPoint: pointerPosition,
         event,
       });
+
+
       this.dropped.next({
         item: this,
         currentIndex,
@@ -1075,6 +1098,7 @@ export class DragRef<T = any> {
         distance,
         dropPoint: pointerPosition,
         event,
+        nestInfo: this.nestInfo // changed by R2M for nesting item
       });
       container.drop(
         this,
@@ -1084,7 +1108,8 @@ export class DragRef<T = any> {
         isPointerOverContainer,
         distance,
         pointerPosition,
-        event
+        event,
+        this.nestInfo
       );
       this._dropContainer = this._initialContainer;
     });
@@ -1105,6 +1130,17 @@ export class DragRef<T = any> {
       y
     );
 
+    // R2M start
+    if (newContainer && this._initialContainer._isOverContainer(x, y)) {
+      let initialRect = this._initialContainer.getClientRect();
+      let newRect = newContainer?.getClientRect();
+      if (newRect && initialRect && initialRect.top > newRect.top) {
+        newContainer = undefined;
+      }
+
+    }
+    // R2M end
+
     // If we couldn't find a new container to move the item into, and the item has left its
     // initial container, check whether the it's over the initial container. This handles the
     // case where two containers are connected one way and the user tries to undo dragging an
@@ -1114,6 +1150,7 @@ export class DragRef<T = any> {
       this._dropContainer !== this._initialContainer &&
       this._initialContainer._isOverContainer(x, y)
     ) {
+
       newContainer = this._initialContainer;
     }
 
@@ -1122,6 +1159,7 @@ export class DragRef<T = any> {
         // Notify the old container that the item has left.
         this.exited.next({ item: this, container: this._dropContainer! });
         this._dropContainer!.exit(this);
+        this._dropContainer!._unnestIfNecessary(this);
         // Notify the new container that the item has entered.
         this._dropContainer = newContainer!;
         this._dropContainer.enter(
@@ -1146,8 +1184,9 @@ export class DragRef<T = any> {
     // Dragging may have been interrupted as a result of the events above.
     if (this.isDragging()) {
       this._dropContainer!._startScrollingIfNecessary(rawX, rawY);
-      this._dropContainer!._sortItem(this, x, y, this._pointerDirectionDelta);
-
+      // R2M start
+      // check if dragging item is being over the middle of item, then nesting it into item's children
+      // Just now, there is no such step.
       if (this.constrainPosition) {
         this._applyPreviewTransform(x, y);
       } else {
@@ -1156,6 +1195,29 @@ export class DragRef<T = any> {
           y - this._pickupPositionInElement.y
         );
       }
+
+      let previewRect = this._preview.getBoundingClientRect();
+
+      let nestIndex = this._dropContainer?._getNestIndex(this, x, y, previewRect, this._pointerDirectionDelta);
+
+      console.log("R2M", "this drag item will be nested into ", nestIndex);
+
+      if (nestIndex !== undefined && nestIndex !== -1) {
+        this._dropContainer?._nestItem(this, nestIndex);
+        this.nestInfo = {
+          nestIndex
+        };
+      } else {
+        if (this.nestInfo) {
+          console.log("container will unnest ");
+          this._dropContainer!._unnestIfNecessary(this);
+        }
+        this._dropContainer!._sortItem(this, x, y, this._pointerDirectionDelta);
+      }
+
+      // R2M end
+
+
     }
   }
 
@@ -1337,13 +1399,13 @@ export class DragRef<T = any> {
     const scrollPosition = this._getViewportScrollPosition();
     const point = isTouchEvent(event)
       ? // `touches` will be empty for start/end events so we have to fall back to `changedTouches`.
-        // Also note that on real devices we're guaranteed for either `touches` or `changedTouches`
-        // to have a value, but Firefox in device emulation mode has a bug where both can be empty
-        // for `touchstart` and `touchend` so we fall back to a dummy object in order to avoid
-        // throwing an error. The value returned here will be incorrect, but since this only
-        // breaks inside a developer tool and the value is only used for secondary information,
-        // we can get away with it. See https://bugzilla.mozilla.org/show_bug.cgi?id=1615824.
-        event.touches[0] || event.changedTouches[0] || { pageX: 0, pageY: 0 }
+      // Also note that on real devices we're guaranteed for either `touches` or `changedTouches`
+      // to have a value, but Firefox in device emulation mode has a bug where both can be empty
+      // for `touchstart` and `touchend` so we fall back to a dummy object in order to avoid
+      // throwing an error. The value returned here will be incorrect, but since this only
+      // breaks inside a developer tool and the value is only used for secondary information,
+      // we can get away with it. See https://bugzilla.mozilla.org/show_bug.cgi?id=1615824.
+      event.touches[0] || event.changedTouches[0] || { pageX: 0, pageY: 0 }
       : event;
 
     const x = point.pageX - scrollPosition.left;
@@ -1371,11 +1433,11 @@ export class DragRef<T = any> {
       : null;
     let { x, y } = this.constrainPosition
       ? this.constrainPosition(
-          point,
-          this,
-          this._initialClientRect!,
-          this._pickupPositionInElement
-        )
+        point,
+        this,
+        this._initialClientRect!,
+        this._pickupPositionInElement
+      )
       : point;
 
     if (this.lockAxis === 'x' || dropContainerLock === 'x') {
