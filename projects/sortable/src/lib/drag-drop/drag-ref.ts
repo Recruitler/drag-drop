@@ -1159,6 +1159,7 @@ export class DragRef<T = any> {
         // Notify the old container that the item has left.
         this.exited.next({ item: this, container: this._dropContainer! });
         this._dropContainer!.exit(this);
+        this._dropContainer!._unnestIfNecessary(this);
         // Notify the new container that the item has entered.
         this._dropContainer = newContainer!;
         this._dropContainer.enter(
@@ -1195,18 +1196,22 @@ export class DragRef<T = any> {
         );
       }
 
-      let previewRect = this._getPreviewRect();
-      
+      let previewRect = this._preview.getBoundingClientRect();
+
       let nestIndex = this._dropContainer?._getNestIndex(this, x, y, previewRect, this._pointerDirectionDelta);
+
+      console.log("R2M", "this drag item will be nested into ", nestIndex);
 
       if (nestIndex !== undefined && nestIndex !== -1) {
         this._dropContainer?._nestItem(this, nestIndex);
-        console.log(">>>>>>>>>>>>>>>>>", nestIndex);
         this.nestInfo = {
           nestIndex
         };
       } else {
-        this.nestInfo = null;
+        if (this.nestInfo) {
+          console.log("container will unnest ");
+          this._dropContainer!._unnestIfNecessary(this);
+        }
         this._dropContainer!._sortItem(this, x, y, this._pointerDirectionDelta);
       }
 

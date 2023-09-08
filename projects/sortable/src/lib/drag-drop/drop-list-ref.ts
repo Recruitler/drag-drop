@@ -83,7 +83,7 @@ export class DropListRef<T = any> {
   // R2M start
   nestEnabled: boolean = true;
 
-  nestThreshold : number = 0.5;
+  nestThreshold: number = 0.5;
   // R2M end
 
   /**
@@ -114,7 +114,7 @@ export class DropListRef<T = any> {
    */
   readonly exited = new Subject<{ item: DragRef; container: DropListRef }>();
 
-// R2M start
+  // R2M start
   /**
    * Emits when the user has moved a new drag item into this container.
    */
@@ -123,8 +123,8 @@ export class DropListRef<T = any> {
     container: DropListRef;
     nestIndex: number
   }>();
-// R2M end
-  
+  // R2M end
+
 
   /** Emits when the user drops an item inside the container. */
   readonly dropped = new Subject<{
@@ -309,15 +309,18 @@ export class DropListRef<T = any> {
    */
   exit(item: DragRef): void {
     this._reset();
-// R2M start
-    if (item.nestInfo) {
-      this._sortStrategy.unnest(item, item.nestInfo.nestIndex);
-      item.nestInfo = null;
-    }
-// R2M end
-
     this.exited.next({ item, container: this });
   }
+
+  // R2M start
+  _unnestIfNecessary(item: DragRef): void {
+    if (item.nestInfo) {
+      let targetItem = this._draggables[item.nestInfo.nestIndex];
+      this._sortStrategy.unnest(item, this._sortStrategy.getItemIndex(targetItem));
+      item.nestInfo = null;
+    }
+  }
+  // R2M end
 
   /**
    * Drops an item into this container.
@@ -341,7 +344,7 @@ export class DropListRef<T = any> {
     distance: Point,
     dropPoint: Point,
     event: MouseEvent | TouchEvent = {} as any,
-    nestInfo : DragNestInfo | null |undefined // added by R2M for nesting item
+    nestInfo: DragNestInfo | null | undefined // added by R2M for nesting item
   ): void {
     this._reset();
     this.dropped.next({
@@ -455,10 +458,9 @@ export class DropListRef<T = any> {
    * @param item 
    * @param nestIndex 
    */
-  _nestItem(item: DragRef, nestIndex : number) : void {
-    console.log("draggables of drop-list-ref" , this._draggables.length);
+  _nestItem(item: DragRef, nestIndex: number): void {
     let targetItem = this._draggables[nestIndex];
-    this._sortStrategy.nest(item,  this._sortStrategy.getItemIndex(targetItem));
+    this._sortStrategy.nest(item, this._sortStrategy.getItemIndex(targetItem));
 
     this.nested.next({
       item,
@@ -485,7 +487,7 @@ export class DropListRef<T = any> {
   ): number {
     // threshold value of left position of pointer for nesting item. 
     // threshold * left + (1 - threshold) * right < pointer's left ===> NESTING!!!!
-    let thresholdNest = 0.5; 
+    let thresholdNest = 0.5;
 
     // Don't nest the item if nesting is disabled or it's out of range.
 
@@ -501,11 +503,9 @@ export class DropListRef<T = any> {
     ) {
       return -1;
     }
-  
 
     let currentIndex = this._sortStrategy.getItemIndex(item);
 
-    console.log('currentIndex', currentIndex);
     // let isVertical = (this._sortStrategy as SingleAxisSortStrategy<DragRef>).orientation === 'vertical';
     let isVertical = true;
     let itemRects = (this._sortStrategy as SingleAxisSortStrategy<DragRef>).getItemBoundaries();
@@ -515,21 +515,15 @@ export class DropListRef<T = any> {
       return index !== currentIndex && rect.left < pointerX && rect.right > pointerX
     });
 
-    console.log('index', index);
-
-
-    // console.log("R2M", " nearest index is ", index, itemRects[index], pointerY);
     if (index == -1)
       return -1;
-    // console.log("R2M previewRect", previewRect);
-    // console.log("R2M itemRects", itemRects[index]);
+    
     if (isVertical && previewRect.x > itemRects[index].left) {
-      console.log("R2M", "this drag item will be nested into ", index);
       return this._draggables.indexOf(this._sortStrategy.getActiveItem(index));
+
     }
 
     if (!isVertical && pointerX < itemRects[index].left * thresholdNest + itemRects[index].right * (1 - thresholdNest)) {
-      console.log("R2M", "this drag item will be nested into ", index);
       return index;
     }
 
@@ -781,7 +775,6 @@ export class DropListRef<T = any> {
     // R2M start
     let siblingContainers = this._siblings.filter((sibling) => sibling._canReceive(item, x, y));
 
-    let i = 0;
     let distMin = -99999;
     let nearestContainer = undefined;
     // find the nearest parent of this container
@@ -795,13 +788,9 @@ export class DropListRef<T = any> {
       }
     }
 
-    if (nearestContainer) {
-      return nearestContainer
-    }
-    else
-      return undefined;
+    return nearestContainer;
     // R2M end
-    return this._siblings.find((sibling) => sibling._canReceive(item, x, y));
+    // return this._siblings.find((sibling) => sibling._canReceive(item, x, y));
 
 
   }
