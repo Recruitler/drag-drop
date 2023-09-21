@@ -13,6 +13,8 @@ import {
   DragDrop,
   moveItemInArray,
   transferArrayItem,
+  CdkNestedDragDropComponent,
+  CdkDropDownItem,
 } from 'projects/sortable/src/lib/drag-drop';
 
 @Component({
@@ -26,6 +28,7 @@ import {
     CdkDragHandle,
     CdkDragPreview,
     CdkDragPlaceholder,
+    CdkNestedDragDropComponent
   ],
   providers: [DragDrop],
   standalone: true,
@@ -45,11 +48,83 @@ export class ExamplesComponent {
     'Episode VIII - The Last Jedi',
     'Episode IX – The Rise of Skywalker',
   ];
+  dropdownTree: CdkDropDownItem[] = [
+    {
+      value: "Section 1",
+
+    },
+    {
+      value: "Section 2",
+      children: [
+        {
+          value: "Section 2.1",
+
+        },
+        {
+          value: "Section 2.2",
+
+        },
+        {
+          value: "Section 2.3",
+
+        }
+      ]
+    },
+    {
+      value: "Section 3",
+      children: [
+        { value: "Section 3.1", },
+        {
+          value: "Section 3.2",
+          children: [
+            {
+              value: "Section 3.2.1",
+
+            },
+            {
+              value: "Section 3.2.2",
+
+            },
+            {
+              value: "Section 3.2.3",
+              children: [
+                {
+                  value: "Section 3.2.3.1",
+
+                },
+                {
+                  value: "Section 3.2.3.2",
+
+                }
+              ]
+            }
+          ]
+        },
+      ]
+    },
+    {
+      value: "Section 4",
+
+    },
+    {
+      value: "Section 5",
+
+    },
+    {
+      value: "Section 6",
+
+    },
+  ];
+
+  onNestDragDropped(event: CdkDragDrop<any>) {
+    console.log("nested drop event", event);
+  }
 
   reorderDrop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.movies, event.previousIndex, event.currentIndex);
   }
 
+  // nestItemClass = "cdk-nest-dragdrop-item";
 
   //  TRANSFERRING ITEMS BETWEEN LISTS EXAMPLE - https://material.angular.io/cdk/drag-drop/overview#transferring-items-between-lists
   todo = ['Get to work', 'Pick up groceries', 'Go home', 'Fall asleep'];

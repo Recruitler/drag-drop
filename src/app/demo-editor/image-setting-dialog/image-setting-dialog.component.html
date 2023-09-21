@@ -1,0 +1,28 @@
+<!-- <div class="modal"> -->
+<div class="modal-content">
+    <div class="modal-header">
+        <span class="close" (click)="handleClick($event, 'close')">&times;</span>
+        <h2>Modal Header</h2>
+    </div>
+    <div class="modal-body">
+        <form>
+            <div class="form-group">
+                <label for="url-input">URL:</label>
+                <input type="url" class="form-control" id="url-input" name="url" [(ngModel)]="url" required>
+            </div>
+            <div class="form-group">
+                <label for="width-input">Width:</label>
+                <input type="number" class="form-control" id="width-input" name="width" min="0" [(ngModel)]="width"  required>
+            </div>
+            <div class="form-group">
+                <label for="height-input">Height:</label>
+                <input type="number" class="form-control" id="height-input" name="height" min="0" [(ngModel)]="height" required>
+            </div>
+            <button type="submit" class="btn btn-primary" (click)="handleClick($event, 'add')">Add</button>
+            <button type="button" class="btn btn-secondary" (click)="handleClick($event, 'close')">Cancel</button>
+        </form>
+
+    </div>
+
+</div>
+<!-- </div> -->

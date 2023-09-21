@@ -314,8 +314,9 @@ export class DropListRef<T = any> {
 
   // R2M start
   _unnestIfNecessary(item: DragRef): void {
-    if (item.nestInfo) {
+    if (item.nestInfo && item.nestInfo.nestIndex !== -1) {
       let targetItem = this._draggables[item.nestInfo.nestIndex];
+      
       this._sortStrategy.unnest(item, this._sortStrategy.getItemIndex(targetItem));
       item.nestInfo = null;
     }
@@ -460,7 +461,9 @@ export class DropListRef<T = any> {
    */
   _nestItem(item: DragRef, nestIndex: number): void {
     let targetItem = this._draggables[nestIndex];
-    this._sortStrategy.nest(item, this._sortStrategy.getItemIndex(targetItem));
+    // if (item.getPlaceholderElement().checkVisibility())
+
+    this._sortStrategy.nest(item, this._sortStrategy.getItemIndex(targetItem), item.nestInfo ? item.nestInfo.nestIndex : -1);
 
     this.nested.next({
       item,
@@ -509,11 +512,14 @@ export class DropListRef<T = any> {
     // let isVertical = (this._sortStrategy as SingleAxisSortStrategy<DragRef>).orientation === 'vertical';
     let isVertical = true;
     let itemRects = (this._sortStrategy as SingleAxisSortStrategy<DragRef>).getItemBoundaries();
+    
     let index = isVertical ? itemRects.findIndex((rect, index) => {
-      return index !== currentIndex && rect.top < pointerY && rect.bottom > pointerY
+
+      return index !== currentIndex && Math.floor(rect.top) <= pointerY && Math.floor(rect.bottom) >= pointerY
     }) : itemRects.findIndex((rect, index) => {
       return index !== currentIndex && rect.left < pointerX && rect.right > pointerX
     });
+
 
     if (index == -1)
       return -1;
@@ -779,7 +785,6 @@ export class DropListRef<T = any> {
     let nearestContainer = undefined;
     // find the nearest parent of this container
     for (let container of siblingContainers) {
-      // console.log("R2M", container.element)
       let top = container._clientRect?.top ? container._clientRect.top : -99999;
 
       if (top > distMin) {

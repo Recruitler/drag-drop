@@ -1,5 +1,28 @@
 <div class="example center">
   <div class="heading">
+    <h2>Nested Drag-Drop Component</h2>
+  </div>
+
+
+  <ng-template #itemTemplate let-value>
+    <div class="example-item-name">
+      {{value}}
+    </div>
+  </ng-template>
+  <ng-template #placeholderTemplate>
+    <div class="example-custom-placeholder"></div>
+  </ng-template>
+
+
+  <div class="example-container">
+    <nested-drag-drop [cdkNestedDropDownData]="dropdownTree" [cdkListItemTemplate]="itemTemplate"
+      [cdkPlaceholderTemplate]="placeholderTemplate" (cdkDragDropped)="onNestDragDropped($event)">
+    </nested-drag-drop>
+  </div>
+</div>
+
+<div class="example center">
+  <div class="heading">
     <h2>Reordering lists</h2>
   </div>
 

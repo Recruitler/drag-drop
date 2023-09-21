@@ -1,0 +1,29 @@
+<div cdkDropListGroup>
+  <ng-template #recursiveList let-items>
+    <div cdkDropList [cdkDropListData]="items" class="cdk-nest-dragdrop-list" (cdkDropListDropped)="drop($event)"
+      (cdkDropListNested)="nest($event)" [cdkDropListConnectedTo]="dls" [cdkDropListNestThreshold]="0.5"
+      [cdkDropListNestEnabled]="true">
+      <div *ngFor="let item of items" class="cdk-nest-dragdrop-item" cdkDrag>
+        
+        <div *cdkDragPlaceholder>
+          <ng-container *ngTemplateOutlet="placeholderTemplate; context: {$implicit: item.value}">
+          </ng-container>
+        </div>
+
+        <ng-container *ngTemplateOutlet="itemTemplate; context: {$implicit: item.value}">
+
+        </ng-container>
+        <div *ngIf="item.children && item.children.length" class="cdk-nest-dragdrop-sublist">
+          <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.children }"></ng-container>
+        </div>
+      </div>
+    </div>
+
+  </ng-template>
+  <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: list }"></ng-container>
+</div>
+
+
+<!-- Copyright 2019 Google Inc. All Rights Reserved.
+    Use of this source code is governed by an MIT-style license that
+    can be found in the LICENSE file at http://angular.io/license -->
