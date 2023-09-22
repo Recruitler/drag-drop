@@ -1,6 +1,6 @@
 {
   "name": "@recruitler/drag-drop",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "peerDependencies": {
     "@angular/common": "^16.1.0",
     "@angular/core": "^16.1.0"

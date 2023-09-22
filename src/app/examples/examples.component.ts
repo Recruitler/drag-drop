@@ -15,7 +15,7 @@ import {
   transferArrayItem,
   CdkNestedDragDropComponent,
   CdkDropDownItem,
-} from 'projects/sortable/src/lib/drag-drop';
+} from '@recruitler/drag-drop';
 
 @Component({
   selector: 'app-examples',
