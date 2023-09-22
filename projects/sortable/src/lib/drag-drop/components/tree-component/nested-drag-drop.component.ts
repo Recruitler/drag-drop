@@ -1,17 +1,17 @@
 import { NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
 import { Component,EventEmitter, Output,TemplateRef, ViewChildren,Input, QueryList } from '@angular/core';
-import { asapScheduler, asyncScheduler, Subject} from 'rxjs';
+import { asapScheduler } from 'rxjs';
 
-import { CdkDragDrop,CdkDragNest} from '../../drag-events';
+import { CdkDragDrop, CdkDragNest } from '../../drag-events';
 
 import { CdkDrag } from '../../directives/drag';
-import {CdkDragHandle} from '../../directives/drag-handle';
+import {CdkDragHandle } from '../../directives/drag-handle';
 import { CdkDragPlaceholder } from '../../directives/drag-placeholder';
 import { CdkDragPreview } from '../../directives/drag-preview';
 import { CdkDropList } from '../../directives/drop-list';
 import { CdkDropListGroup } from '../../directives/drop-list-group';
-import {DragDrop} from '../../drag-drop';
-import { NgStyle, NgClass } from '@angular/common';
+import { DragDrop } from '../../drag-drop';
+import { NgClass } from '@angular/common';
 
 import {
   moveItemInArray,
@@ -50,8 +50,6 @@ const TAG = "nested-drag-drop.component.ts";
 })
 
 export class CdkNestedDragDropComponent {
-
-
   @Input('cdkNestedDropDownData')
   list: CdkDropDownItem[] = [];
 
@@ -68,12 +66,10 @@ export class CdkNestedDragDropComponent {
 
   @ViewChildren(CdkDropList)
   private dlq: QueryList<CdkDropList>;
+  dls: CdkDropList[] = [];
 
-  public dls: CdkDropList[] = [];
 
-  /** Emits when the user drops an item inside the container. */
   drop(event: CdkDragDrop<any>) {
-
     this.dropped.emit(event);
 
     if (event.previousContainer === event.container) {
@@ -82,28 +78,27 @@ export class CdkNestedDragDropComponent {
       if (nestInfo) {
         let listData: CdkDropDownItem[] = event.container.data;
 
-        console.log(TAG, listData);
-
         if (nestInfo.nestIndex < listData.length && nestInfo.nestIndex >= 0) {
           let targetItem = listData[nestInfo.nestIndex];
           let targetChildren = targetItem?.children ? targetItem.children : [];
-          // targetChildren.push({value: ""});
-          transferArrayItem(event.container.data,
+          transferArrayItem(
+            event.container.data,
             targetChildren,
             event.previousIndex,
-            targetChildren.length);
+            targetChildren.length
+          );
 
           targetItem.children = targetChildren;
-          console.log(TAG, targetChildren);
-
         }
       } else {
-        moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+        moveItemInArray(
+          event.container.data, 
+          event.previousIndex, 
+          event.currentIndex
+        );
       }
     } else {
       let nestInfo = event.nestInfo;
-
-      console.log(TAG, nestInfo);
 
       if (nestInfo) {
         let listData: CdkDropDownItem[] = event.container.data;
@@ -111,27 +106,26 @@ export class CdkNestedDragDropComponent {
         if (nestInfo.nestIndex < listData.length && nestInfo.nestIndex >= 0) {
           let targetItem = listData[nestInfo.nestIndex];
           let targetChildren = targetItem?.children ? targetItem.children : [];
-          // targetChildren.push({value: ""});
-          transferArrayItem(event.previousContainer.data,
+          transferArrayItem(
+            event.previousContainer.data,
             targetChildren,
             event.previousIndex,
-            targetChildren.length);
-
+            targetChildren.length
+          );
           targetItem.children = targetChildren;
-
         }
       } else {
-        transferArrayItem(event.previousContainer.data,
+        transferArrayItem(
+          event.previousContainer.data,
           event.container.data,
           event.previousIndex,
-          event.currentIndex);
+          event.currentIndex
+        );
       }
-
     }
   }
 
-  nest(event: CdkDragNest<any>) {
-  }
+  nest(event: CdkDragNest<any>) {}
 
   isArray(item: any): boolean {
     return Array.isArray(item);
@@ -146,10 +140,10 @@ export class CdkNestedDragDropComponent {
 
     asapScheduler.schedule(() => { this.dls = ldls; });
   }
-
 }
 
-
-/**  Copyright 2019 Google Inc. All Rights Reserved.
-    Use of this source code is governed by an MIT-style license that
-    can be found in the LICENSE file at http://angular.io/license */
+/**  
+Copyright 2019 Google Inc. All Rights Reserved.
+Use of this source code is governed by an MIT-style license that
+can be found in the LICENSE file at http://angular.io/license 
+*/
