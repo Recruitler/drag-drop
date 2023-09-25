@@ -5,7 +5,7 @@ import { asapScheduler } from 'rxjs';
 import { CdkDragDrop, CdkDragNest } from '../../drag-events';
 
 import { CdkDrag } from '../../directives/drag';
-import {CdkDragHandle } from '../../directives/drag-handle';
+import { CdkDragHandle } from '../../directives/drag-handle';
 import { CdkDragPlaceholder } from '../../directives/drag-placeholder';
 import { CdkDragPreview } from '../../directives/drag-preview';
 import { CdkDropList } from '../../directives/drop-list';
@@ -20,8 +20,9 @@ import {
 
 
 export interface CdkDropDownItem {
-  value: any;
-  children?: CdkDropDownItem[];
+  // value: any; // too rigid
+  [key: string]: any; // a CdkDropDownItem will be an unknown data model
+  children?: CdkDropDownItem[]; // we can require `children[]` 
 }
 
 const TAG = "nested-drag-drop.component.ts";
@@ -32,6 +33,9 @@ const TAG = "nested-drag-drop.component.ts";
 @Component({
   selector: 'nested-drag-drop',
   templateUrl: './nested-drag-drop.component.html',
+  styleUrls: ['nested-drag-drop.component.scss'],
+  standalone: true,
+  providers: [DragDrop],
   imports: [
     NgFor,
     NgIf,
@@ -44,9 +48,6 @@ const TAG = "nested-drag-drop.component.ts";
     CdkDragPlaceholder,
     NgClass
   ],
-  providers: [DragDrop],
-  standalone: true,
-  styleUrls: ['nested-drag-drop.component.scss'],
 })
 
 export class CdkNestedDragDropComponent {
@@ -66,7 +67,7 @@ export class CdkNestedDragDropComponent {
 
   @ViewChildren(CdkDropList)
   private dlq: QueryList<CdkDropList>;
-  dls: CdkDropList[] = [];
+  dropLists: CdkDropList[] = [];
 
 
   drop(event: CdkDragDrop<any>) {
@@ -138,7 +139,7 @@ export class CdkNestedDragDropComponent {
       ldls.push(dl)
     });
 
-    asapScheduler.schedule(() => { this.dls = ldls; });
+    asapScheduler.schedule(() => { this.dropLists = ldls; });
   }
 }
 
