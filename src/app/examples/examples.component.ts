@@ -1,4 +1,4 @@
-import { NgFor } from '@angular/common';
+import { NgFor ,NgIf} from '@angular/common';
 import { Component } from '@angular/core';
 
 // our lib - a custom version of https://github.com/angular/components/tree/main/src/cdk/drag-drop
@@ -15,13 +15,14 @@ import {
   transferArrayItem,
   CdkNestedDragDropComponent,
   CdkDropDownItem,
-} from '@recruitler/drag-drop';
+} from 'projects/sortable/src/lib/drag-drop';
 
 @Component({
   selector: 'app-examples',
   templateUrl: './examples.component.html',
   imports: [
     NgFor,
+    NgIf,
     CdkDropList,
     CdkDropListGroup,
     CdkDrag,
@@ -50,50 +51,64 @@ export class ExamplesComponent {
   ];
   dropdownTree: CdkDropDownItem[] = [
     {
-      value: "Section 1",
-
+      name: "Section 1",
     },
     {
-      value: "Section 2",
+      name: "Section 2",
       children: [
         {
-          value: "Section 2.1",
+          name: "Section 2.1",
+          description: "This is a description about this section"
 
         },
         {
-          value: "Section 2.2",
+          name: "Section 2.2",
+          description: "This is a description about this section"
 
         },
         {
-          value: "Section 2.3",
+          name: "Section 2.3",
+          description: "This is a description about this section"
 
         }
       ]
     },
     {
-      value: "Section 3",
+      name: "Section 3",
       children: [
-        { value: "Section 3.1", },
         {
-          value: "Section 3.2",
+          name: "Section 3.1",
+          description: "This is a description about this section"
+        },
+        {
+          name: "Section 3.2",
+          description: "This is a description about this section",
           children: [
             {
-              value: "Section 3.2.1",
+              name: "Section 3.2.1",
+              description: "This is a description about this section"
 
             },
             {
-              value: "Section 3.2.2",
+              name: "Section 3.2.2",
+              description: "This is a description about this section"
 
             },
             {
-              value: "Section 3.2.3",
+              name: "Section 3.2.3",
+              description: "This is a description about this section",
+
               children: [
                 {
-                  value: "Section 3.2.3.1",
+                  name: "Section 3.2.3.1",
+                  description: "This is a description about this section",
+
 
                 },
                 {
-                  value: "Section 3.2.3.2",
+                  name: "Section 3.2.3.2",
+                  description: "This is a description about this section",
+
 
                 }
               ]
@@ -103,15 +118,21 @@ export class ExamplesComponent {
       ]
     },
     {
-      value: "Section 4",
+      name: "Section 4",
+      description: "This is a description about this section",
+
 
     },
     {
-      value: "Section 5",
+      name: "Section 5",
+      description: "This is a description about this section",
+
 
     },
     {
-      value: "Section 6",
+      name: "Section 6",
+      description: "This is a description about this section",
+
 
     },
   ];

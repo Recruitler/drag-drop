@@ -20,7 +20,6 @@ import {
 
 
 export interface CdkDropDownItem {
-  // value: any; // too rigid
   [key: string]: any; // a CdkDropDownItem will be an unknown data model
   children?: CdkDropDownItem[]; // we can require `children[]` 
 }

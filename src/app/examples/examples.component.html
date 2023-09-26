@@ -3,9 +3,11 @@
     <h2>Nested Drag-Drop Component</h2>
   </div>
 
-  <ng-template #itemTemplate let-value>
+  <ng-template #itemTemplate let-item>
     <div class="example-item-name">
-      {{value}}
+      <p *ngIf="item.name != undefined"><b>{{item.name }}</b></p>
+      <p *ngIf="item.description != undefined">{{item.description + " about " + item.name }}</p>
+      
     </div>
   </ng-template>
   <ng-template #placeholderTemplate>

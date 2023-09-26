@@ -12,10 +12,10 @@
 
       <div *ngFor="let item of items" class="cdk-nest-dragdrop-item" cdkDrag>
         <div *cdkDragPlaceholder>
-          <ng-container *ngTemplateOutlet="placeholderTemplate; context: { $implicit: item.value }" />
+          <ng-container *ngTemplateOutlet="placeholderTemplate; context: { $implicit: item }" />
         </div>
 
-        <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: item.value }" />
+        <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: item }" />
 
         <div *ngIf="item.children && item.children.length" class="cdk-nest-dragdrop-sublist">
           <ng-container *ngTemplateOutlet="recursiveList; context:{ $implicit: item.children }" />
