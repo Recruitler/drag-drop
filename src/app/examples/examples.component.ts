@@ -1,6 +1,7 @@
-import { NgFor ,NgIf} from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
-
+// import {MatProgressSpinnerModule} from '@angular/material';
+// MatProgressSpinnerModule
 // our lib - a custom version of https://github.com/angular/components/tree/main/src/cdk/drag-drop
 import {
   CdkDrag,
@@ -15,7 +16,15 @@ import {
   transferArrayItem,
   CdkNestedDragDropComponent,
   CdkDropDownItem,
+  splitTree,
+  buildTree,
+  constructCdkIndexTree,
+  CdkIndexTree,
+  getTotalCount,
+  getDecendantCount,
 } from 'projects/sortable/src/lib/drag-drop';
+
+import {CircularProgressComponent} from './circular-progressive.component';
 
 @Component({
   selector: 'app-examples',
@@ -29,7 +38,9 @@ import {
     CdkDragHandle,
     CdkDragPreview,
     CdkDragPlaceholder,
-    CdkNestedDragDropComponent
+    CdkNestedDragDropComponent,
+    CircularProgressComponent,
+
   ],
   providers: [DragDrop],
   standalone: true,
@@ -49,6 +60,7 @@ export class ExamplesComponent {
     'Episode VIII - The Last Jedi',
     'Episode IX – The Rise of Skywalker',
   ];
+
   dropdownTree: CdkDropDownItem[] = [
     {
       name: "Section 1",
@@ -137,8 +149,10 @@ export class ExamplesComponent {
     },
   ];
 
+  indexTree: CdkIndexTree;
+
   onNestDragDropped(event: CdkDragDrop<any>) {
-    console.log("nested drop event", event);
+
   }
 
   reorderDrop(event: CdkDragDrop<string[]>) {
@@ -178,4 +192,47 @@ export class ExamplesComponent {
     moveItemInArray(this.timePeriods, event.previousIndex, event.currentIndex);
   }
 
+
+  currentPage: number = 0;
+
+  totalCount: number = 0;
+
+  pageSize: number = 5;
+
+  listItems: CdkDropDownItem[] = [];
+
+  isLoading = false;
+
+  pageChanged(event: number) {
+    this.isLoading = true;
+    setTimeout(() => {
+      const page: number = event;
+
+      let startIndex = page * this.pageSize;
+      let endIndex = Math.min(startIndex + this.pageSize - 1, this.totalCount - 1);
+
+      const splittedTree = splitTree(this.indexTree, startIndex, endIndex);
+
+      splittedTree.children && (this.listItems = splittedTree.children)
+
+      splittedTree.children && (this.currentPage = page);
+
+      this.isLoading = false;
+    }, 3000);
+
+
+  }
+
+  ngAfterContentInit() {
+    const tree = buildTree(this.dropdownTree);
+    this.totalCount = getDecendantCount(tree) - 1;
+    this.indexTree = constructCdkIndexTree(tree);
+
+    const splittedTree = splitTree(this.indexTree, 0, this.pageSize - 1);
+
+    splittedTree.children && (this.listItems = splittedTree.children)
+
+    splittedTree.children && (this.currentPage = 0)
+
+  }
 }

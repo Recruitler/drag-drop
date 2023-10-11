@@ -1,5 +1,5 @@
 import { NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
-import { Component,EventEmitter, Output,TemplateRef, ViewChildren,Input, QueryList } from '@angular/core';
+import { Component, EventEmitter, Output, TemplateRef, ViewChildren, Input, QueryList } from '@angular/core';
 import { asapScheduler } from 'rxjs';
 
 import { CdkDragDrop, CdkDragNest } from '../../drag-events';
@@ -12,17 +12,16 @@ import { CdkDropList } from '../../directives/drop-list';
 import { CdkDropListGroup } from '../../directives/drop-list-group';
 import { DragDrop } from '../../drag-drop';
 import { NgClass } from '@angular/common';
-
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import {
   moveItemInArray,
   transferArrayItem,
 } from '../../drag-utils';
 
+import { constructCdkIndexTree, getDecendantCount, getTotalCount, splitTree } from '../../drag-drop-tree';
 
-export interface CdkDropDownItem {
-  [key: string]: any; // a CdkDropDownItem will be an unknown data model
-  children?: CdkDropDownItem[]; // we can require `children[]` 
-}
+import { CdkIndexTree, CdkDropDownItem } from '../../drag-drop-tree';
+
 
 const TAG = "nested-drag-drop.component.ts";
 
@@ -45,13 +44,16 @@ const TAG = "nested-drag-drop.component.ts";
     CdkDragHandle,
     CdkDragPreview,
     CdkDragPlaceholder,
-    NgClass
+    NgClass,
+    MatPaginatorModule
   ],
 })
 
 export class CdkNestedDragDropComponent {
+
+
   @Input('cdkNestedDropDownData')
-  list: CdkDropDownItem[] = [];
+  itemList: CdkDropDownItem[] = [];
 
   @Input('cdkListItemTemplate')
   itemTemplate!: TemplateRef<any>;
@@ -59,13 +61,22 @@ export class CdkNestedDragDropComponent {
   @Input('cdkPlaceholderTemplate')
   placeholderTemplate!: TemplateRef<any>;
 
-  /** Emits when the user drops the item inside a container. */
+
+  @Input('cdkPageTotalItem') totalCount: number = 0;
+  @Input('cdkPageCurrentIndex') currentPage: number = 0;
+  @Input('cdkPageSize') pageSize: number = 0;
+
   @Output('cdkDragDropped') readonly dropped: EventEmitter<CdkDragDrop<any>> = new EventEmitter<
     CdkDragDrop<any>
   >();
 
+  @Output('cdkPageChanged') readonly pageChanged: EventEmitter<number> = new EventEmitter<
+    number
+  >();
+
   @ViewChildren(CdkDropList)
   private dlq: QueryList<CdkDropList>;
+
   dropLists: CdkDropList[] = [];
 
 
@@ -92,8 +103,8 @@ export class CdkNestedDragDropComponent {
         }
       } else {
         moveItemInArray(
-          event.container.data, 
-          event.previousIndex, 
+          event.container.data,
+          event.previousIndex,
           event.currentIndex
         );
       }
@@ -125,7 +136,7 @@ export class CdkNestedDragDropComponent {
     }
   }
 
-  nest(event: CdkDragNest<any>) {}
+  nest(event: CdkDragNest<any>) { }
 
   isArray(item: any): boolean {
     return Array.isArray(item);
@@ -139,6 +150,13 @@ export class CdkNestedDragDropComponent {
     });
 
     asapScheduler.schedule(() => { this.dropLists = ldls; });
+
+  }
+
+  onPageChanged(event: PageEvent) {
+
+    this.pageChanged.emit(event.pageIndex);
+
   }
 }
 

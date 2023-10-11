@@ -22,3 +22,5 @@ export * from './directives/drag';
 export * from './directives/drag-handle';
 export * from './directives/drag-preview';
 export * from './directives/drag-placeholder';
+
+export * from './drag-drop-tree';
