@@ -1,11 +1,57 @@
 <div class="example center">
   <div class="heading">
+    <h2>Nested Drag-Drop Component</h2>
+  </div>
+
+  <ng-template #itemTemplate let-item>
+    <div class="example-item-name">
+      <p *ngIf="item.name != undefined">
+        <b>{{ item.name }}</b>
+      </p>
+      <p *ngIf="item.description != undefined">
+        {{ item.description + " about " + item.name }}
+      </p>
+    </div>
+  </ng-template>
+  <ng-template #placeholderTemplate>
+    <div class="example-custom-placeholder"></div>
+  </ng-template>
+
+  <div class="example-container" style="position: relative">
+    <div
+      *ngIf="isLoading"
+      style="position: absolute; left: 45%; top: 45%; z-index: 30"
+    >
+      <app-circular-progress />
+      <!-- <mat-progress-spinner mode="indeterminate"></mat-progress-spinner> -->
+    </div>
+    <nested-drag-drop
+      [cdkNestedDropDownData]="listItems"
+      [cdkPageTotalItem]="totalCount"
+      [cdkPageCurrentIndex]="currentPage"
+      [cdkPageSize]="pageSize"
+      [cdkListItemTemplate]="itemTemplate"
+      [cdkPlaceholderTemplate]="placeholderTemplate"
+      (cdkDragDropped)="onNestDragDropped($event)"
+      (cdkPageChanged)="pageChanged($event)"
+    >
+    </nested-drag-drop>
+  </div>
+</div>
+
+<div class="example center">
+  <div class="heading">
     <h2>Reordering lists</h2>
   </div>
 
   <div class="example-container">
-    <div cdkDropList class="example-list" [cdkDropListNestThreshold]="0.5" [cdkDropListNestEnabled]="true"
-      (cdkDropListDropped)="reorderDrop($event)">
+    <div
+      cdkDropList
+      class="example-list"
+      [cdkDropListNestThreshold]="0.5"
+      [cdkDropListNestEnabled]="true"
+      (cdkDropListDropped)="reorderDrop($event)"
+    >
       <div class="example-box" *ngFor="let movie of movies" cdkDrag>
         {{ movie }}
       </div>
@@ -21,8 +67,14 @@
   <div class="wrapper">
     <div class="example-container">
       <h3>To do</h3>
-      <div cdkDropList #todoList="cdkDropList" [cdkDropListData]="todo" [cdkDropListConnectedTo]="[doneList]"
-        class="example-list" (cdkDropListDropped)="transferDrop($event)">
+      <div
+        cdkDropList
+        #todoList="cdkDropList"
+        [cdkDropListData]="todo"
+        [cdkDropListConnectedTo]="[doneList]"
+        class="example-list"
+        (cdkDropListDropped)="transferDrop($event)"
+      >
         <div class="example-box" *ngFor="let item of todo" cdkDrag>
           {{ item }}
         </div>
@@ -31,8 +83,14 @@
 
     <div class="example-container">
       <h3>Done</h3>
-      <div cdkDropList #doneList="cdkDropList" [cdkDropListData]="done" [cdkDropListConnectedTo]="[todoList]"
-        class="example-list" (cdkDropListDropped)="transferDrop($event)">
+      <div
+        cdkDropList
+        #doneList="cdkDropList"
+        class="example-list"
+        [cdkDropListData]="done"
+        [cdkDropListConnectedTo]="[todoList]"
+        (cdkDropListDropped)="transferDrop($event)"
+      >
         <div class="example-box" *ngFor="let item of done" cdkDrag>
           {{ item }}
         </div>
@@ -47,8 +105,12 @@
   </div>
 
   <div class="example-container">
-    <div cdkDropList cdkDropListOrientation="horizontal" class="horizontal-list"
-      (cdkDropListDropped)="horizontalDrop($event)">
+    <div
+      cdkDropList
+      cdkDropListOrientation="horizontal"
+      class="horizontal-list"
+      (cdkDropListDropped)="horizontalDrop($event)"
+    >
       <div class="example-box" *ngFor="let timePeriod of timePeriods" cdkDrag>
         {{ timePeriod }}
       </div>

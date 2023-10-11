@@ -1,0 +1,59 @@
+<mat-paginator
+  [length]="totalCount"
+  [pageSize]="pageSize"
+  [pageSizeOptions]="[5, 10, 25, 100]"
+  (page)="onPageChanged($event)"
+  aria-label="Select page"
+>
+</mat-paginator>
+
+<div cdkDropListGroup>
+  <ng-template #recursiveList let-items>
+    <div
+      class="cdk-nest-dragdrop-list"
+      cdkDropList
+      [cdkDropListData]="items"
+      (cdkDropListDropped)="drop($event)"
+      (cdkDropListNested)="nest($event)"
+      [cdkDropListConnectedTo]="dropLists"
+      [cdkDropListNestThreshold]="0.5"
+      [cdkDropListNestEnabled]="true"
+    >
+      <div *ngFor="let item of items" class="cdk-nest-dragdrop-item" cdkDrag>
+        <div *cdkDragPlaceholder>
+          <ng-container
+            *ngTemplateOutlet="
+              placeholderTemplate;
+              context: { $implicit: item }
+            "
+          />
+        </div>
+
+        <ng-container
+          *ngTemplateOutlet="itemTemplate; context: { $implicit: item }"
+        />
+
+        <div
+          *ngIf="item.children && item.children.length"
+          class="cdk-nest-dragdrop-sublist"
+        >
+          <ng-container
+            *ngTemplateOutlet="
+              recursiveList;
+              context: { $implicit: item.children }
+            "
+          />
+        </div>
+      </div>
+    </div>
+  </ng-template>
+  <ng-container
+    *ngTemplateOutlet="recursiveList; context: { $implicit: itemList }"
+  />
+</div>
+
+<!-- 
+Copyright 2019 Google Inc. All Rights Reserved.
+Use of this source code is governed by an MIT-style license that
+can be found in the LICENSE file at http://angular.io/license 
+-->

@@ -1198,9 +1198,10 @@ export class DragRef<T = any> {
 
       let previewRect = this._preview.getBoundingClientRect();
 
-      let nestIndex = this._dropContainer?._getNestIndex(this, x, y, previewRect, this._pointerDirectionDelta);
 
-      console.log("R2M", "this drag item will be nested into ", nestIndex);
+
+
+      let nestIndex = this._dropContainer?._getNestIndex(this, x, y, previewRect, this._pointerDirectionDelta);
 
       if (nestIndex !== undefined && nestIndex !== -1) {
         this._dropContainer?._nestItem(this, nestIndex);
@@ -1208,8 +1209,8 @@ export class DragRef<T = any> {
           nestIndex
         };
       } else {
-        if (this.nestInfo) {
-          console.log("container will unnest ");
+        if (this.nestInfo && this.nestInfo.nestIndex !== -1) {
+
           this._dropContainer!._unnestIfNecessary(this);
         }
         this._dropContainer!._sortItem(this, x, y, this._pointerDirectionDelta);
@@ -1489,6 +1490,8 @@ export class DragRef<T = any> {
 
     return delta;
   }
+
+  
 
   /** Toggles the native drag interactions, based on how many handles are registered. */
   private _toggleNativeDragInteractions() {

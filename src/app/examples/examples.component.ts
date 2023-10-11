@@ -1,6 +1,7 @@
-import { NgFor } from '@angular/common';
+import { NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
-
+// import {MatProgressSpinnerModule} from '@angular/material';
+// MatProgressSpinnerModule
 // our lib - a custom version of https://github.com/angular/components/tree/main/src/cdk/drag-drop
 import {
   CdkDrag,
@@ -13,19 +14,33 @@ import {
   DragDrop,
   moveItemInArray,
   transferArrayItem,
+  CdkNestedDragDropComponent,
+  CdkDropDownItem,
+  splitTree,
+  buildTree,
+  constructCdkIndexTree,
+  CdkIndexTree,
+  getTotalCount,
+  getDecendantCount,
 } from 'projects/sortable/src/lib/drag-drop';
+
+import {CircularProgressComponent} from './circular-progressive.component';
 
 @Component({
   selector: 'app-examples',
   templateUrl: './examples.component.html',
   imports: [
     NgFor,
+    NgIf,
     CdkDropList,
     CdkDropListGroup,
     CdkDrag,
     CdkDragHandle,
     CdkDragPreview,
     CdkDragPlaceholder,
+    CdkNestedDragDropComponent,
+    CircularProgressComponent,
+
   ],
   providers: [DragDrop],
   standalone: true,
@@ -46,10 +61,105 @@ export class ExamplesComponent {
     'Episode IX – The Rise of Skywalker',
   ];
 
+  dropdownTree: CdkDropDownItem[] = [
+    {
+      name: "Section 1",
+    },
+    {
+      name: "Section 2",
+      children: [
+        {
+          name: "Section 2.1",
+          description: "This is a description about this section"
+
+        },
+        {
+          name: "Section 2.2",
+          description: "This is a description about this section"
+
+        },
+        {
+          name: "Section 2.3",
+          description: "This is a description about this section"
+
+        }
+      ]
+    },
+    {
+      name: "Section 3",
+      children: [
+        {
+          name: "Section 3.1",
+          description: "This is a description about this section"
+        },
+        {
+          name: "Section 3.2",
+          description: "This is a description about this section",
+          children: [
+            {
+              name: "Section 3.2.1",
+              description: "This is a description about this section"
+
+            },
+            {
+              name: "Section 3.2.2",
+              description: "This is a description about this section"
+
+            },
+            {
+              name: "Section 3.2.3",
+              description: "This is a description about this section",
+
+              children: [
+                {
+                  name: "Section 3.2.3.1",
+                  description: "This is a description about this section",
+
+
+                },
+                {
+                  name: "Section 3.2.3.2",
+                  description: "This is a description about this section",
+
+
+                }
+              ]
+            }
+          ]
+        },
+      ]
+    },
+    {
+      name: "Section 4",
+      description: "This is a description about this section",
+
+
+    },
+    {
+      name: "Section 5",
+      description: "This is a description about this section",
+
+
+    },
+    {
+      name: "Section 6",
+      description: "This is a description about this section",
+
+
+    },
+  ];
+
+  indexTree: CdkIndexTree;
+
+  onNestDragDropped(event: CdkDragDrop<any>) {
+
+  }
+
   reorderDrop(event: CdkDragDrop<string[]>) {
     moveItemInArray(this.movies, event.previousIndex, event.currentIndex);
   }
 
+  // nestItemClass = "cdk-nest-dragdrop-item";
 
   //  TRANSFERRING ITEMS BETWEEN LISTS EXAMPLE - https://material.angular.io/cdk/drag-drop/overview#transferring-items-between-lists
   todo = ['Get to work', 'Pick up groceries', 'Go home', 'Fall asleep'];
@@ -82,4 +192,47 @@ export class ExamplesComponent {
     moveItemInArray(this.timePeriods, event.previousIndex, event.currentIndex);
   }
 
+
+  currentPage: number = 0;
+
+  totalCount: number = 0;
+
+  pageSize: number = 5;
+
+  listItems: CdkDropDownItem[] = [];
+
+  isLoading = false;
+
+  pageChanged(event: number) {
+    this.isLoading = true;
+    setTimeout(() => {
+      const page: number = event;
+
+      let startIndex = page * this.pageSize;
+      let endIndex = Math.min(startIndex + this.pageSize - 1, this.totalCount - 1);
+
+      const splittedTree = splitTree(this.indexTree, startIndex, endIndex);
+
+      splittedTree.children && (this.listItems = splittedTree.children)
+
+      splittedTree.children && (this.currentPage = page);
+
+      this.isLoading = false;
+    }, 3000);
+
+
+  }
+
+  ngAfterContentInit() {
+    const tree = buildTree(this.dropdownTree);
+    this.totalCount = getDecendantCount(tree) - 1;
+    this.indexTree = constructCdkIndexTree(tree);
+
+    const splittedTree = splitTree(this.indexTree, 0, this.pageSize - 1);
+
+    splittedTree.children && (this.listItems = splittedTree.children)
+
+    splittedTree.children && (this.currentPage = 0)
+
+  }
 }

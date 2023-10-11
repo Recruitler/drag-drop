@@ -119,6 +119,7 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
     const currentIndex = siblings.findIndex(
       (currentItem) => currentItem.drag === item
     );
+
     const siblingAtNewPosition = siblings[newIndex];
     const currentPosition = siblings[currentIndex].clientRect;
     const newPosition = siblingAtNewPosition.clientRect;
@@ -173,12 +174,14 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
         );
         adjustClientRect(sibling.clientRect, 0, offset);
       } else {
+        // elementToOffset.style.backgroundColor = 'green';
         elementToOffset.style.transform = combineTransforms(
           `translate3d(0, ${Math.round(sibling.offset)}px, 0)`,
           sibling.initialTransform
         );
         adjustClientRect(sibling.clientRect, offset, 0);
       }
+
     });
 
     // Note that it's important that we do this after the client rects have been adjusted.
@@ -275,21 +278,20 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
    * @param nestIndex Target Index at which the item will be neste. If omitted, the container will try to figure it
    *   out automatically.
    */
-  nest(item: T, nestIndex: number): void {
+  nest(item: T, nestIndex: number, currentNestIndex: number): void {
+    if (nestIndex == currentNestIndex)
+      return;
 
-    const placeholder = item.getPlaceholderElement();
-
-    
     let nestPositionReference: T | undefined = this._itemPositions[nestIndex].drag;
 
-    // If the item at the new position is the same as the item that is being dragged,
-    // it means that we're trying to restore the item to its initial position. In this
-    // case we should use the next item from the list as the reference.
-    // it means that we are trying to nest the item into the same item
     if (nestPositionReference === item) {
       return;
     }
+    if (currentNestIndex >= 0) {
+      // this.unnest(item, currentNestIndex);
+    }
 
+    const placeholder = item.getPlaceholderElement();
 
     // Don't use items that are being dragged as a reference, because
     // their element has been moved down to the bottom of the body.
@@ -301,37 +303,32 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
       const element = nestPositionReference.getRootElement();
 
       element.appendChild(placeholder);
-      // element!.insertBefore(placeholder, element.children[1]);
+
+      this._itemPositions.forEach((item, index) => {
+        item.drag.getRootElement().style.transform = "";
+      });
+
     }
 
-    // The transform needs to be cleared so it doesn't throw off the measurements.
     placeholder.style.transform = '';
-    // this._cacheItemPositions();
-    // Note that usually `start` is called together with `enter` when an item goes into a new
-    // container. This will cache item positions, but we need to refresh them since the amount
-    // of items has changed.
+
   }
 
   unnest(item: T, nestIndex: number): void {
-    const activeDraggables = this._activeDraggables;
-
-    const currentIndex = activeDraggables.indexOf(item);
+    // const activeDraggables = this.getItemIndex(item);
+    if (nestIndex >= this._itemPositions.length || nestIndex < 0)
+      return;
+    
+    const currentIndex = this.getItemIndex(item);
 
     const placeholder = item.getPlaceholderElement();
 
+    let nestPositionReference: T | undefined = this._itemPositions[nestIndex]!.drag;
+    let parent = nestPositionReference!.getRootElement().parentElement;
 
-
-    let nestPositionReference: T | undefined = activeDraggables[nestIndex];
-
-    // If the item at the new position is the same as the item that is being dragged,
-    // it means that we're trying to restore the item to its initial position. In this
-    // case we should use the next item from the list as the reference.
-    // it means that we are trying to nest the item into the same item
     if (nestPositionReference === item) {
       return;
-      // newPositionReference = activeDraggables[newIndex + 1];
     }
-
 
     // Don't use items that are being dragged as a reference, because
     // their element has been moved down to the bottom of the body.
@@ -341,11 +338,12 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
     ) {
 
       const element = nestPositionReference.getRootElement();
-      console.log('element', element.innerHTML);
       element.removeChild(element.lastChild as Node);
-      console.log('element', element.innerHTML);
 
-      // element!.appendChild(placeholder);
+      if (parent) {
+        parent.insertBefore(placeholder, parent.children[currentIndex]);
+      }
+
     }
 
     // The transform needs to be cleared so it doesn't throw off the measurements.

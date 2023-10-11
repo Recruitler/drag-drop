@@ -1,12 +1,19 @@
 {
-  "name": "sortable",
-  "version": "0.0.1",
+  "name": "@recruitler/drag-drop",
+  "version": "0.0.5",
   "peerDependencies": {
+    "rxjs": "~7.8.0",
     "@angular/common": "^16.1.0",
+    "@angular/cdk": "^16.2.1",
     "@angular/core": "^16.1.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "sideEffects": false
+
+  "sideEffects": false,
+  "scripts": {
+    "ng": "ng",
+    "packagr": "ng-packagr -p ng-package.json"
+  }
 }

@@ -14,7 +14,7 @@ export {CDK_DRAG_PARENT} from './drag-parent';
 export * from './drag-events';
 export * from './drag-utils';
 export * from './drag-drop-registry';
-
+export * from './components/tree-component/nested-drag-drop.component';
 export {CdkDropList} from './directives/drop-list';
 export * from './directives/config';
 export * from './directives/drop-list-group';
@@ -22,3 +22,5 @@ export * from './directives/drag';
 export * from './directives/drag-handle';
 export * from './directives/drag-preview';
 export * from './directives/drag-placeholder';
+
+export * from './drag-drop-tree';
