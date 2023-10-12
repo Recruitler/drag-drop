@@ -48,6 +48,7 @@ export interface CdkDragEnter<T = any, I = T> {
   currentIndex: number;
 }
 
+// R2M start
 /** Event emitted when the user moves an item into a new drop container. */
 export interface CdkDragNest<T = any, I = T> {
   /** Container into which the user has moved the item. */
@@ -57,6 +58,15 @@ export interface CdkDragNest<T = any, I = T> {
   /** Index at which the item has entered the container. */
   nestIndex: number;
 }
+
+export interface CdkNestDrop {
+  nestNodeIndex : number,
+  prevNodeIndex : number,
+  curNodeIndex : number,
+}
+
+// R2M end
+
 
 /**
  * Event emitted when the user removes an item from a

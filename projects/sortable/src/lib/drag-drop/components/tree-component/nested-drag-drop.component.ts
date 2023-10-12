@@ -1,8 +1,8 @@
-import { NgFor, NgIf, NgTemplateOutlet } from '@angular/common';
-import { Component, EventEmitter, Output, TemplateRef, ViewChildren, Input, QueryList } from '@angular/core';
+import { NgFor, NgIf, NgStyle, NgTemplateOutlet } from '@angular/common';
+import { Component, EventEmitter, Output, ElementRef, afterRender, TemplateRef, ViewChildren, ViewChild, Input, QueryList } from '@angular/core';
 import { asapScheduler } from 'rxjs';
 
-import { CdkDragDrop, CdkDragNest } from '../../drag-events';
+import { CdkDragDrop, CdkDragNest, CdkNestDrop } from '../../drag-events';
 
 import { CdkDrag } from '../../directives/drag';
 import { CdkDragHandle } from '../../directives/drag-handle';
@@ -18,7 +18,7 @@ import {
   transferArrayItem,
 } from '../../drag-utils';
 
-import { constructCdkIndexTree, getDecendantCount, getTotalCount, splitTree } from '../../drag-drop-tree';
+import { buildTree, constructCdkIndexTree, getDecendantCount, getTotalCount, splitTree } from '../../drag-drop-tree';
 
 import { CdkIndexTree, CdkDropDownItem } from '../../drag-drop-tree';
 
@@ -45,15 +45,15 @@ const TAG = "nested-drag-drop.component.ts";
     CdkDragPreview,
     CdkDragPlaceholder,
     NgClass,
-    MatPaginatorModule
+    MatPaginatorModule,
+    NgStyle
   ],
 })
-
 export class CdkNestedDragDropComponent {
 
 
   @Input('cdkNestedDropDownData')
-  itemList: CdkDropDownItem[] = [];
+  itemTreeList: CdkDropDownItem[] = [];
 
   @Input('cdkListItemTemplate')
   itemTemplate!: TemplateRef<any>;
@@ -61,90 +61,109 @@ export class CdkNestedDragDropComponent {
   @Input('cdkPlaceholderTemplate')
   placeholderTemplate!: TemplateRef<any>;
 
-
+  @Input('cdkDefaultPagination') paginationDefault = false;
   @Input('cdkPageTotalItem') totalCount: number = 0;
   @Input('cdkPageCurrentIndex') currentPage: number = 0;
   @Input('cdkPageSize') pageSize: number = 0;
 
-  @Output('cdkDragDropped') readonly dropped: EventEmitter<CdkDragDrop<any>> = new EventEmitter<
-    CdkDragDrop<any>
+  @Output('cdkDragDropped') readonly dropped: EventEmitter<CdkNestDrop> = new EventEmitter<
+    CdkNestDrop
   >();
 
   @Output('cdkPageChanged') readonly pageChanged: EventEmitter<number> = new EventEmitter<
     number
   >();
 
+  @Output('cdkScrollNextPage') readonly scrollNextPage: EventEmitter<number> = new EventEmitter<
+    number
+  >();
+
+  @ViewChild('scrollBox') scrollBox!: ElementRef<HTMLElement>;
+  @ViewChild('scrollGap') scrollGap!: ElementRef<HTMLElement>;
+  @ViewChild('scrollContent') scrollContent!: ElementRef<HTMLElement>;
+
+
+
+
   @ViewChildren(CdkDropList)
   private dlq: QueryList<CdkDropList>;
 
   dropLists: CdkDropList[] = [];
 
+  dropGutterSize = 0;
+
+  indexTree: CdkIndexTree;
 
   drop(event: CdkDragDrop<any>) {
-    this.dropped.emit(event);
 
-    if (event.previousContainer === event.container) {
-      let nestInfo = event.nestInfo;
+    let prevListData: CdkDropDownItem[] = event.previousContainer.data;
+    let curListData: CdkDropDownItem[] = event.container.data;
 
-      if (nestInfo) {
-        let listData: CdkDropDownItem[] = event.container.data;
+    const previousIndex = prevListData.length > 0 && prevListData[0]._isEmpty == true ? event.previousIndex + 1 : event.previousIndex;
+    const currentIndex = curListData.length > 0 && curListData[0]._isEmpty == true ? event.currentIndex + 1 : event.currentIndex;
+    let nestIndex = -1;
 
-        if (nestInfo.nestIndex < listData.length && nestInfo.nestIndex >= 0) {
-          let targetItem = listData[nestInfo.nestIndex];
-          let targetChildren = targetItem?.children ? targetItem.children : [];
-          transferArrayItem(
-            event.container.data,
-            targetChildren,
-            event.previousIndex,
-            targetChildren.length
-          );
-
-          targetItem.children = targetChildren;
-        }
-      } else {
-        moveItemInArray(
-          event.container.data,
-          event.previousIndex,
-          event.currentIndex
-        );
-      }
-    } else {
-      let nestInfo = event.nestInfo;
-
-      if (nestInfo) {
-        let listData: CdkDropDownItem[] = event.container.data;
-
-        if (nestInfo.nestIndex < listData.length && nestInfo.nestIndex >= 0) {
-          let targetItem = listData[nestInfo.nestIndex];
-          let targetChildren = targetItem?.children ? targetItem.children : [];
-          transferArrayItem(
-            event.previousContainer.data,
-            targetChildren,
-            event.previousIndex,
-            targetChildren.length
-          );
-          targetItem.children = targetChildren;
-        }
-      } else {
-        transferArrayItem(
-          event.previousContainer.data,
-          event.container.data,
-          event.previousIndex,
-          event.currentIndex
-        );
-      }
+    let nestInfo = event.nestInfo;
+    if (nestInfo && nestInfo.nestIndex < curListData.length && nestInfo.nestIndex >= 0) {
+      nestIndex = nestInfo.nestIndex;
+      curListData.length > 0 && curListData[0]._isEmpty == true && (nestIndex = nestIndex + 1);
     }
+
+    const prevNodeIndex = this.indexTree.dropItems.indexOf(prevListData[previousIndex]) - this.dropGutterSize;
+    const curNodeIndex = this.indexTree.dropItems.indexOf(curListData[currentIndex]) - this.dropGutterSize;
+    const nestNodeIndex = this.indexTree.dropItems.indexOf(curListData[nestIndex]) - this.dropGutterSize;
+
+    this.dropped.emit({ prevNodeIndex, curNodeIndex, nestNodeIndex });
+
+    if (nestIndex >= 0) {
+      let targetItem = curListData[nestIndex];
+      let targetChildren = targetItem?.children ? targetItem.children : [];
+
+      transferArrayItem(
+        prevListData,
+        targetChildren,
+        previousIndex,
+        targetChildren.length
+      );
+      targetItem.children = targetChildren;
+    } else {
+      transferArrayItem(
+        prevListData,
+        curListData,
+        previousIndex,
+        currentIndex
+      );
+    }
+    // }
   }
 
-  nest(event: CdkDragNest<any>) { }
+  nest(event: CdkDragNest<any>) {
 
-  isArray(item: any): boolean {
-    return Array.isArray(item);
+  }
+
+  getDropGutterSize(): number {
+    let size: number = 0;
+    let firstChild: CdkDropDownItem | undefined = this.itemTreeList[0];
+    while (firstChild && firstChild._isEmpty == true) {
+      size++;
+
+      if (firstChild.children && firstChild.children.length > 0) {
+        firstChild = firstChild.children[0];
+      } else {
+        firstChild = undefined;
+      }
+    }
+    this.dropGutterSize = size;
+
+    this.indexTree = constructCdkIndexTree(buildTree(this.itemTreeList));
+
+    return size;
   }
 
   ngAfterViewInit() {
-    const ldls: CdkDropList[] = [];
+    console.log("NgAfterViewinit");
 
+    const ldls: CdkDropList[] = [];
     this.dlq.forEach((dl) => {
       ldls.push(dl)
     });
@@ -156,7 +175,24 @@ export class CdkNestedDragDropComponent {
   onPageChanged(event: PageEvent) {
 
     this.pageChanged.emit(event.pageIndex);
+  }
 
+  onScroll(event: Event) {
+      
+    
+
+  }
+
+  hideGap: boolean = true;
+  ngAfterContentChecked() {
+
+    if ((this.currentPage + 1) * this.pageSize > this.totalCount) {
+      this.hideGap = true;
+    }
+  }
+
+
+  constructor() {
   }
 }
 

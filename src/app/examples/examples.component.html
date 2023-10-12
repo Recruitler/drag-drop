@@ -27,6 +27,7 @@
     </div>
     <nested-drag-drop
       [cdkNestedDropDownData]="listItems"
+      [cdkDefaultPagination]="true"
       [cdkPageTotalItem]="totalCount"
       [cdkPageCurrentIndex]="currentPage"
       [cdkPageSize]="pageSize"
@@ -34,12 +35,13 @@
       [cdkPlaceholderTemplate]="placeholderTemplate"
       (cdkDragDropped)="onNestDragDropped($event)"
       (cdkPageChanged)="pageChanged($event)"
+      (cdkScrollNextPage)="onScrollNextPage($event)"
     >
     </nested-drag-drop>
   </div>
 </div>
 
-<div class="example center">
+<!-- <div class="example center">
   <div class="heading">
     <h2>Reordering lists</h2>
   </div>
@@ -57,9 +59,9 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
-<div class="example">
+<!-- <div class="example">
   <div class="heading full">
     <h2>Transferring items between lists</h2>
   </div>
@@ -97,9 +99,9 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
-<div class="example">
+<!-- <div class="example">
   <div class="heading full">
     <h2>List orientation</h2>
   </div>
@@ -116,4 +118,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
