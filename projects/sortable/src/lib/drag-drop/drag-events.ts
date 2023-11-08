@@ -6,8 +6,9 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import type {CdkDrag} from './directives/drag';
-import type {CdkDropList} from './directives/drop-list';
+import type { CdkDrag } from './directives/drag';
+import type { CdkDropList } from './directives/drop-list';
+import { CdkDropDownItem } from './drag-drop-tree';
 import { DragNestInfo } from './drag-ref';
 
 /** Event emitted when the user starts dragging a draggable. */
@@ -60,9 +61,9 @@ export interface CdkDragNest<T = any, I = T> {
 }
 
 export interface CdkNestDrop {
-  nestNodeIndex : number,
-  prevNodeIndex : number,
-  curNodeIndex : number,
+  source : CdkDropDownItem,
+  target : CdkDropDownItem,
+  isNesting : boolean,
 }
 
 // R2M end

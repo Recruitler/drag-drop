@@ -7,22 +7,21 @@
  */
 
 import { Direction } from '@angular/cdk/bidi';
-import { ElementRef } from '@angular/core';
 import { coerceElement } from '@angular/cdk/coercion';
-import { DragDropRegistry } from '../drag-drop-registry';
-import { moveItemInArray } from '../drag-utils';
-import { combineTransforms } from '../dom/styling';
+import { ElementRef } from '@angular/core';
 import {
   adjustClientRect,
   getMutableClientRect,
   isInsideClientRect,
 } from '../dom/client-rect';
+import { combineTransforms } from '../dom/styling';
+import { DragDropRegistry } from '../drag-drop-registry';
+import { moveItemInArray } from '../drag-utils';
 import {
   DropListSortStrategy,
   DropListSortStrategyItem,
   SortPredicate,
 } from './drop-list-sort-strategy';
-import { deepCloneNode } from '../dom/clone-node';
 
 /**
  * Entry in the position cache for draggable items.
@@ -301,7 +300,6 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
     ) {
 
       const element = nestPositionReference.getRootElement();
-
       element.appendChild(placeholder);
 
       this._itemPositions.forEach((item, index) => {
@@ -318,7 +316,7 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
     // const activeDraggables = this.getItemIndex(item);
     if (nestIndex >= this._itemPositions.length || nestIndex < 0)
       return;
-    
+
     const currentIndex = this.getItemIndex(item);
 
     const placeholder = item.getPlaceholderElement();
@@ -542,7 +540,7 @@ export class SingleAxisSortStrategy<T extends DropListSortStrategyItem>
   }
 
   /**
-   * 
+   *
    * @returns ClientRect values of all items
    */
   public getItemBoundaries(): ClientRect[] {

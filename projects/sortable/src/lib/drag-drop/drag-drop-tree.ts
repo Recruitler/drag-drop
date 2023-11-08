@@ -2,7 +2,7 @@ import { transferArrayItem } from "./drag-utils";
 
 export interface CdkDropDownItem {
     [key: string]: any; // a CdkDropDownItem will be an unknown data model
-    children?: CdkDropDownItem[]; // we can require `children[]` 
+    children?: CdkDropDownItem[]; // we can require `children[]`
 }
 
 
@@ -151,7 +151,7 @@ function _splitTree(node: CdkIndexTreeNode, startIndex: number, endIndex: number
     let hasReached = false;
 
     if (node.indexOfList < startIndex || node.indexOfList > endIndex)
-        newDropItem._isEmpty = true;
+        newDropItem["_isEmpty"] = true;
     else
         newDropItem = Object.assign({}, node.itemOfList, { children: undefined });
 
@@ -206,12 +206,12 @@ export function swapTreeNodes(tree: CdkIndexTree, sourceIndex: number, targetInd
 
         if (sourceChildren && targetChildren) {
 
-            
-            
+
+
             let sourceChildIndex = sourceChildren.indexOf(sourceNode.itemOfList);
             let targetChildIndex = targetChildren.indexOf(targetNode.itemOfList);
-            
-            
+
+
 
             sourceChildIndex >= 0 && targetChildIndex >= 0 && transferArrayItem(sourceChildren, targetChildren, sourceChildIndex, targetChildIndex);
 
@@ -231,8 +231,8 @@ export function nestTreeNode(tree: CdkIndexTree, sourceIndex: number, nestIndex:
 
         if (sourceChildren) {
 
-            
-            
+
+
             let sourceChildIndex = sourceChildren.indexOf(sourceNode.itemOfList);
 
             // sourceChildIndex >= 0 && targetChildIndex >= 0 && transferArrayItem(sourceChildren, targetChildren, sourceChildIndex, targetChildIndex);
