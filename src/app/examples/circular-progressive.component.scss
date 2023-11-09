@@ -12,8 +12,8 @@
   border-radius: 50%;
   border-top: 3px solid #7e11c796;
   border-bottom: 3px solid #7e11c796;
-  -webkit-animation: spin-inverse 0.6 ease-out infinite;
-  animation: spin-inverse 0.6s ease-out infinite;
+  -webkit-animation: spin-inverse 0.6s infinite;
+  animation: spin-inverse 0.6s  infinite;
 }
 @-webkit-keyframes spin {
   0% {

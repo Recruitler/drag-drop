@@ -1,5 +1,6 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
+import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
 // import {MatProgressSpinnerModule} from '@angular/material';
 // MatProgressSpinnerModule
 // our lib - a custom version of https://github.com/angular/components/tree/main/src/cdk/drag-drop
@@ -25,6 +26,7 @@ import {
   CdkNestDrop,
   swapTreeNodes,
   nestTreeNode,
+  IPageMode,
 } from 'projects/sortable/src/lib/drag-drop';
 
 import { CircularProgressComponent } from './circular-progressive.component';
@@ -43,7 +45,7 @@ import { CircularProgressComponent } from './circular-progressive.component';
     CdkDragPlaceholder,
     CdkNestedDragDropComponent,
     CircularProgressComponent,
-
+    MatPaginatorModule,
   ],
   providers: [DragDrop],
   standalone: true,
@@ -105,6 +107,7 @@ export class ExamplesComponent {
 
 
 
+  pageMode: IPageMode = 'PAGINATION';
 
   dropdownTree: CdkDropDownItem[] = [
     {
@@ -209,26 +212,7 @@ export class ExamplesComponent {
   onNestDragDropped(event: CdkNestDrop) {
 
 
-    const offset = this.currentPage * this.pageSize;
 
-    const curNodeIndex = event.curNodeIndex + offset;
-
-    const prevNodeIndex = event.prevNodeIndex + offset;
-
-    const nestNodeIndex = event.nestNodeIndex + offset;
-
-    if (event.nestNodeIndex >= 0) {
-
-      nestTreeNode(this.indexTree, prevNodeIndex, nestNodeIndex);
-
-      this.indexTree = constructCdkIndexTree(buildTree(this.dropdownTree));
-
-    } else {
-
-      swapTreeNodes(this.indexTree, prevNodeIndex, curNodeIndex);
-
-      this.indexTree = constructCdkIndexTree(buildTree(this.dropdownTree))
-    }
 
   }
 
@@ -247,7 +231,7 @@ export class ExamplesComponent {
       splittedTree.children && (this.currentPage = page);
 
       this.isLoading = false;
-    }, 250);
+    }, 1250);
 
 
   }
@@ -283,5 +267,10 @@ export class ExamplesComponent {
 
     splittedTree.children && (this.currentPage = 0)
 
+  }
+
+  onPageUpdate(page: PageEvent) {
+    console.log('page :>> ', page);
+    this.listItems = this.dropdownTree.splice(page.pageIndex * page.pageSize, (page.pageIndex + 1) * page.pageSize - 1) ;
   }
 }

@@ -1,7 +1,6 @@
 import { NgFor, NgIf, NgStyle, NgTemplateOutlet } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Input, Output, QueryList, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
 import { asapScheduler } from 'rxjs';
-
 import { CdkDragDrop, CdkDragNest, CdkNestDrop } from '../../drag-events';
 
 import { NgClass } from '@angular/common';
@@ -19,8 +18,6 @@ import {
 
 export type IPageMode = 'VIRTUAL-SCROLL' | 'PAGINATION';
 
-import { PaginationComponent } from '@recruitler/recruitler-lib';
-import { IPagination } from '@recruitler/utils';
 import { CdkDropDownItem, } from '../../drag-drop-tree';
 
 
@@ -47,7 +44,6 @@ const TAG = "nested-drag-drop.component.ts";
     CdkDragPlaceholder,
     NgClass,
     NgStyle,
-    PaginationComponent
   ],
   encapsulation: ViewEncapsulation.None
 })
@@ -65,10 +61,6 @@ export class CdkNestedDragDropComponent {
 
   @Input('cdkPageMode') pageMode: IPageMode = 'PAGINATION';
 
-  @Input('cdkPagination')
-  pagination: IPagination
-
-
   @Input('height') style_height: string = '100%';
 
 
@@ -76,9 +68,6 @@ export class CdkNestedDragDropComponent {
     CdkNestDrop
   >();
 
-  @Output('cdkPageChanged') readonly pageChanged: EventEmitter<IPagination> = new EventEmitter<
-    IPagination
-  >();
 
 
   @ViewChild('scrollBox') scrollBox!: ElementRef<HTMLElement>;
@@ -167,18 +156,11 @@ export class CdkNestedDragDropComponent {
     }
   }
 
-  onPageUpdate(page: number) {
-    this.pagination.page = page;
-    this.pageChanged.emit(this.pagination);
-  }
-
   hideGap: boolean = true;
   ngAfterContentChecked() {
     if (this.pageMode == 'VIRTUAL-SCROLL') {
-      if ((this.pagination.page + 1) * this.pagination.size > this.pagination.total) {
-        this.hideGap = true;
-      } else
-        this.hideGap = false;
+
+      this.hideGap = false;
     } else if (this.pageMode == 'PAGINATION') {
       this.hideGap = true;
     }
