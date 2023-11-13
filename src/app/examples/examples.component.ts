@@ -210,7 +210,7 @@ export class ExamplesComponent {
   isLoading = false;
 
   onNestDragDropped(event: CdkNestDrop) {
-
+    console.log('drag&drop event :>> ', event);
 
 
 

@@ -22,6 +22,22 @@ export interface CdkIndexTreeNode {
     children?: CdkIndexTreeNode[],
 }
 
+export function getParent(roots: CdkDropDownItem[], children: CdkDropDownItem[]): CdkDropDownItem | undefined {
+    for (const root of roots) {
+        if (root.children) {
+            if ( root.children == children)
+                return root;
+            else {
+                const parent = root.children.length > 0 ?  getParent(root.children, children) : undefined;
+                if (parent !== undefined)
+                    return parent
+            }
+        } 
+    }
+
+    return undefined;
+}
+
 export function getDecendantCount(parent: CdkDropDownItem): number {
     let count = 1;
 

@@ -61,8 +61,9 @@ export interface CdkDragNest<T = any, I = T> {
 }
 
 export interface CdkNestDrop {
-  source : CdkDropDownItem,
-  target : CdkDropDownItem,
+  item : CdkDropDownItem,
+  parent? : CdkDropDownItem,
+  position?: number
   isNesting : boolean,
 }
 

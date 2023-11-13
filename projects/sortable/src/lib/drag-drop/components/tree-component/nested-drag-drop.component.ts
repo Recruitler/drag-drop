@@ -18,7 +18,7 @@ import {
 
 export type IPageMode = 'VIRTUAL-SCROLL' | 'PAGINATION';
 
-import { CdkDropDownItem, } from '../../drag-drop-tree';
+import { CdkDropDownItem, getParent, } from '../../drag-drop-tree';
 
 
 const TAG = "nested-drag-drop.component.ts";
@@ -94,17 +94,19 @@ export class CdkNestedDragDropComponent {
       nestIndex = nestInfo.nestIndex;
       curListData.length > 0 && curListData[0]['_isEmpty'] == true && (nestIndex = nestIndex + 1);
     }
-    // SEND MESSAGE
-
-    this.dropped.emit({
-      source: prevListData[previousIndex],
-      target: curListData[nestIndex],
-      isNesting: nestIndex >= 0
-    });
 
     if (nestIndex >= 0) {
       let targetItem = curListData[nestIndex];
       let targetChildren = targetItem?.children ? targetItem.children : [];
+
+      // BEGIN OF SENDING MESSAGE
+      this.dropped.emit({
+        item: prevListData[previousIndex],
+        parent: targetItem,
+        position: targetChildren.length,
+        isNesting: true
+      });
+      // END OF SENDING MESSAGE
 
       transferArrayItem(
         prevListData,
@@ -114,6 +116,17 @@ export class CdkNestedDragDropComponent {
       );
       targetItem.children = targetChildren;
     } else {
+      // BEGIN OF SENDING MESSAGE
+      const parent = getParent(this.itemTreeList, curListData)
+        ;
+      this.dropped.emit({
+        item: prevListData[previousIndex],
+        parent: parent,
+        position: currentIndex,
+        isNesting: false
+      });
+      // END OF SENDING MESSAGE
+
       transferArrayItem(
         prevListData,
         curListData,
