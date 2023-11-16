@@ -1,9 +1,9 @@
 import { NgFor, NgIf, NgStyle, NgTemplateOutlet } from '@angular/common';
 import { Component, ElementRef, EventEmitter, Input, Output, QueryList, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
 import { asapScheduler } from 'rxjs';
-import { CdkDragDrop, CdkDragNest, CdkNestDrop } from '../../drag-events';
-
 import { NgClass } from '@angular/common';
+
+import { CdkDragDrop, CdkDragNest, CdkNestDrop } from '../../drag-events';
 import { CdkDrag } from '../../directives/drag';
 import { CdkDragHandle } from '../../directives/drag-handle';
 import { CdkDragPlaceholder } from '../../directives/drag-placeholder';
