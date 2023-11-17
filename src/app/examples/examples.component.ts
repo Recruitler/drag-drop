@@ -107,7 +107,7 @@ export class ExamplesComponent {
 
 
 
-  pageMode: IPageMode = 'PAGINATION';
+  pageMode: IPageMode = 'VIRTUAL-SCROLL';
 
   dropdownTree: CdkDropDownItem[] = [
     {
