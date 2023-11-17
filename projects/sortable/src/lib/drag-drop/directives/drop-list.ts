@@ -25,18 +25,18 @@ import {
   SkipSelf,
   Inject,
 } from '@angular/core';
-import {Directionality} from '@angular/cdk/bidi';
-import {ScrollDispatcher} from '@angular/cdk/scrolling';
-import {CDK_DROP_LIST, CdkDrag} from './drag';
-import {CdkDragDrop, CdkDragEnter, CdkDragNest,  CdkDragExit, CdkDragSortEvent} from '../drag-events';
-import {CDK_DROP_LIST_GROUP, CdkDropListGroup} from './drop-list-group';
-import {DropListRef} from '../drop-list-ref';
-import {DragRef} from '../drag-ref';
-import {DragDrop} from '../drag-drop';
-import {DropListOrientation, DragAxis, DragDropConfig, CDK_DRAG_CONFIG} from './config';
-import {merge, Subject} from 'rxjs';
-import {startWith, takeUntil} from 'rxjs/operators';
-import {assertElementNode} from './assertions';
+import { Directionality } from '@angular/cdk/bidi';
+import { ScrollDispatcher } from '@angular/cdk/scrolling';
+import { CDK_DROP_LIST, CdkDrag } from './drag';
+import { CdkDragDrop, CdkDragEnter, CdkDragNest, CdkDragExit, CdkDragSortEvent } from '../drag-events';
+import { CDK_DROP_LIST_GROUP, CdkDropListGroup } from './drop-list-group';
+import { DropListRef } from '../drop-list-ref';
+import { DragRef } from '../drag-ref';
+import { DragDrop } from '../drag-drop';
+import { DropListOrientation, DragAxis, DragDropConfig, CDK_DRAG_CONFIG } from './config';
+import { merge, Subject } from 'rxjs';
+import { startWith, takeUntil } from 'rxjs/operators';
+import { assertElementNode } from './assertions';
 
 /** Counter used to generate unique ids for drop zones. */
 let _uniqueIdCounter = 0;
@@ -48,8 +48,8 @@ let _uniqueIdCounter = 0;
   standalone: true,
   providers: [
     // Prevent child drop lists from picking up the same group as their parent.
-    {provide: CDK_DROP_LIST_GROUP, useValue: undefined},
-    {provide: CDK_DROP_LIST, useExisting: CdkDropList},
+    { provide: CDK_DROP_LIST_GROUP, useValue: undefined },
+    { provide: CDK_DROP_LIST, useExisting: CdkDropList },
   ],
   host: {
     'class': 'cdk-drop-list',
@@ -131,14 +131,16 @@ export class CdkDropList<T = any> implements OnDestroy {
   /** Number of pixels to scroll for each frame when auto-scrolling an element. */
   @Input('cdkDropListAutoScrollStep')
   autoScrollStep: NumberInput;
-// R2M start
+  // R2M start
   @Input('cdkDropListNestEnabled')
   nestEnabled: BooleanInput;
 
   @Input('cdkDropListNestThreshold')
   nestThreshold: NumberInput;
 
-// R2M end
+
+
+  // R2M end
   /** Emits when the user drops an item inside the container. */
   @Output('cdkDropListDropped')
   readonly dropped: EventEmitter<CdkDragDrop<T, any>> = new EventEmitter<CdkDragDrop<T, any>>();
@@ -149,10 +151,10 @@ export class CdkDropList<T = any> implements OnDestroy {
   @Output('cdkDropListEntered')
   readonly entered: EventEmitter<CdkDragEnter<T>> = new EventEmitter<CdkDragEnter<T>>();
 
-// R2M start
+  // R2M start
   @Output('cdkDropListNested')
   readonly nested: EventEmitter<CdkDragNest<T>> = new EventEmitter<CdkDragNest<T>>();
-// R2M end
+  // R2M end
   /**
    * Emits when the user removes an item from the container
    * by dragging it into another container.
@@ -189,7 +191,7 @@ export class CdkDropList<T = any> implements OnDestroy {
 
     // TODO: remove all mentions of dev mode or integrate the CDK's ngDevMode
     // if (typeof ngDevMode === 'undefined' || ngDevMode) {
-      assertElementNode(element.nativeElement, 'cdkDropList');
+    assertElementNode(element.nativeElement, 'cdkDropList');
     // }
 
     this._dropListRef = dragDrop.createDropList(element);
@@ -323,6 +325,7 @@ export class CdkDropList<T = any> implements OnDestroy {
       // R2M start
       ref.nestEnabled = coerceBooleanProperty(this.nestEnabled);
       ref.nestThreshold = coerceNumberProperty(this.nestThreshold, 0.5);
+      this._group && (ref.dropGutterSize = this._group?.dropGutterSize);
       // R2M end
       ref
         .connectedTo(siblings.filter(drop => drop && drop !== this).map(list => list._dropListRef))
@@ -344,7 +347,7 @@ export class CdkDropList<T = any> implements OnDestroy {
         currentIndex: event.currentIndex,
       });
     });
-// R2M start
+    // R2M start
     ref.nested.subscribe(event => {
       this.nested.emit({
         container: this,
@@ -352,7 +355,7 @@ export class CdkDropList<T = any> implements OnDestroy {
         nestIndex: event.nestIndex
       });
     });
-// R2M end
+    // R2M end
     ref.exited.subscribe(event => {
       this.exited.emit({
         container: this,
@@ -396,7 +399,7 @@ export class CdkDropList<T = any> implements OnDestroy {
 
   /** Assigns the default input values based on a provided config object. */
   private _assignDefaults(config: DragDropConfig) {
-    const {lockAxis, draggingDisabled, sortingDisabled, listAutoScrollDisabled, listOrientation} =
+    const { lockAxis, draggingDisabled, sortingDisabled, listAutoScrollDisabled, listOrientation } =
       config;
 
     this.disabled = draggingDisabled == null ? false : draggingDisabled;

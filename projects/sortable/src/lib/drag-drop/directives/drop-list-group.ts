@@ -7,7 +7,7 @@
  */
 
 import {Directive, OnDestroy, Input, InjectionToken} from '@angular/core';
-import {BooleanInput, coerceBooleanProperty} from '@angular/cdk/coercion';
+import {BooleanInput, NumberInput, coerceBooleanProperty} from '@angular/cdk/coercion';
 
 /**
  * Injection token that can be used to reference instances of `CdkDropListGroup`. It serves as
@@ -34,6 +34,9 @@ export class CdkDropListGroup<T> implements OnDestroy {
   /** Drop lists registered inside the group. */
   readonly _items = new Set<T>();
 
+  @Input('cdkDropGutterSize')
+  dropGutterSize: number;
+
   /** Whether starting a dragging sequence from inside this group is disabled. */
   @Input('cdkDropListGroupDisabled')
   get disabled(): boolean {
@@ -47,4 +50,6 @@ export class CdkDropListGroup<T> implements OnDestroy {
   ngOnDestroy() {
     this._items.clear();
   }
+
+  
 }

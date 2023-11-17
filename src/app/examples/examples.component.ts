@@ -1,5 +1,6 @@
 import { NgFor, NgIf } from '@angular/common';
 import { Component } from '@angular/core';
+import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
 // import {MatProgressSpinnerModule} from '@angular/material';
 // MatProgressSpinnerModule
 // our lib - a custom version of https://github.com/angular/components/tree/main/src/cdk/drag-drop
@@ -22,9 +23,13 @@ import {
   CdkIndexTree,
   getTotalCount,
   getDecendantCount,
+  CdkNestDrop,
+  swapTreeNodes,
+  nestTreeNode,
+  IPageMode,
 } from 'projects/sortable/src/lib/drag-drop';
 
-import {CircularProgressComponent} from './circular-progressive.component';
+import { CircularProgressComponent } from './circular-progressive.component';
 
 @Component({
   selector: 'app-examples',
@@ -40,7 +45,7 @@ import {CircularProgressComponent} from './circular-progressive.component';
     CdkDragPlaceholder,
     CdkNestedDragDropComponent,
     CircularProgressComponent,
-
+    MatPaginatorModule,
   ],
   providers: [DragDrop],
   standalone: true,
@@ -60,6 +65,49 @@ export class ExamplesComponent {
     'Episode VIII - The Last Jedi',
     'Episode IX – The Rise of Skywalker',
   ];
+
+
+
+  reorderDrop(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.movies, event.previousIndex, event.currentIndex);
+  }
+
+  // nestItemClass = "cdk-nest-dragdrop-item";
+
+  //  TRANSFERRING ITEMS BETWEEN LISTS EXAMPLE - https://material.angular.io/cdk/drag-drop/overview#transferring-items-between-lists
+  todo = ['Get to work', 'Pick up groceries', 'Go home', 'Fall asleep'];
+  done = ['Get up', 'Brush teeth', 'Take a shower', 'Check e-mail', 'Walk dog'];
+
+  transferDrop(event: CdkDragDrop<string[]>) {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    } else {
+      transferArrayItem(
+        event.previousContainer.data,
+        event.container.data,
+        event.previousIndex,
+        event.currentIndex,
+      );
+    }
+  }
+
+
+  // List orientation - https://material.angular.io/cdk/drag-drop/overview#list-orientation
+  timePeriods = [
+    'Bronze age',
+    'Iron age',
+    'Middle ages',
+    'Early modern period',
+    'Long nineteenth century',
+  ];
+
+  horizontalDrop(event: CdkDragDrop<string[]>) {
+    moveItemInArray(this.timePeriods, event.previousIndex, event.currentIndex);
+  }
+
+
+
+  pageMode: IPageMode = 'VIRTUAL-SCROLL';
 
   dropdownTree: CdkDropDownItem[] = [
     {
@@ -151,48 +199,6 @@ export class ExamplesComponent {
 
   indexTree: CdkIndexTree;
 
-  onNestDragDropped(event: CdkDragDrop<any>) {
-
-  }
-
-  reorderDrop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.movies, event.previousIndex, event.currentIndex);
-  }
-
-  // nestItemClass = "cdk-nest-dragdrop-item";
-
-  //  TRANSFERRING ITEMS BETWEEN LISTS EXAMPLE - https://material.angular.io/cdk/drag-drop/overview#transferring-items-between-lists
-  todo = ['Get to work', 'Pick up groceries', 'Go home', 'Fall asleep'];
-  done = ['Get up', 'Brush teeth', 'Take a shower', 'Check e-mail', 'Walk dog'];
-
-  transferDrop(event: CdkDragDrop<string[]>) {
-    if (event.previousContainer === event.container) {
-      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    } else {
-      transferArrayItem(
-        event.previousContainer.data,
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex,
-      );
-    }
-  }
-
-
-  // List orientation - https://material.angular.io/cdk/drag-drop/overview#list-orientation
-  timePeriods = [
-    'Bronze age',
-    'Iron age',
-    'Middle ages',
-    'Early modern period',
-    'Long nineteenth century',
-  ];
-
-  horizontalDrop(event: CdkDragDrop<string[]>) {
-    moveItemInArray(this.timePeriods, event.previousIndex, event.currentIndex);
-  }
-
-
   currentPage: number = 0;
 
   totalCount: number = 0;
@@ -202,6 +208,13 @@ export class ExamplesComponent {
   listItems: CdkDropDownItem[] = [];
 
   isLoading = false;
+
+  onNestDragDropped(event: CdkNestDrop) {
+    console.log('drag&drop event :>> ', event);
+
+
+
+  }
 
   pageChanged(event: number) {
     this.isLoading = true;
@@ -218,9 +231,29 @@ export class ExamplesComponent {
       splittedTree.children && (this.currentPage = page);
 
       this.isLoading = false;
-    }, 3000);
+    }, 1250);
 
 
+  }
+
+  onScrollNextPage(event: number) {
+    console.log('event :>> ', event);
+    this.isLoading = true;
+    setTimeout(() => {
+      const page: number = event + 1;
+
+      let startIndex = 0;
+      let endIndex = Math.min(page * this.pageSize + this.pageSize - 1, this.totalCount - 1);
+
+      const splittedTree = splitTree(this.indexTree, startIndex, endIndex);
+
+      splittedTree.children && (this.listItems = splittedTree.children)
+
+      splittedTree.children && (this.currentPage = page);
+
+      this.isLoading = false;
+
+    }, 250);
   }
 
   ngAfterContentInit() {
@@ -234,5 +267,10 @@ export class ExamplesComponent {
 
     splittedTree.children && (this.currentPage = 0)
 
+  }
+
+  onPageUpdate(page: PageEvent) {
+    console.log('page :>> ', page);
+    this.listItems = this.dropdownTree.splice(page.pageIndex * page.pageSize, (page.pageIndex + 1) * page.pageSize - 1) ;
   }
 }

@@ -1,59 +1,52 @@
-<mat-paginator
-  [length]="totalCount"
-  [pageSize]="pageSize"
-  [pageSizeOptions]="[5, 10, 25, 100]"
-  (page)="onPageChanged($event)"
-  aria-label="Select page"
->
-</mat-paginator>
+<!-- <lib-pagination [pagination]="pagination" [navigate]="false" [loading]="false" (pageUpdate)="onPageUpdate($event)" /> -->
 
-<div cdkDropListGroup>
-  <ng-template #recursiveList let-items>
-    <div
-      class="cdk-nest-dragdrop-list"
-      cdkDropList
-      [cdkDropListData]="items"
-      (cdkDropListDropped)="drop($event)"
-      (cdkDropListNested)="nest($event)"
-      [cdkDropListConnectedTo]="dropLists"
-      [cdkDropListNestThreshold]="0.5"
-      [cdkDropListNestEnabled]="true"
-    >
-      <div *ngFor="let item of items" class="cdk-nest-dragdrop-item" cdkDrag>
-        <div *cdkDragPlaceholder>
-          <ng-container
-            *ngTemplateOutlet="
-              placeholderTemplate;
-              context: { $implicit: item }
-            "
-          />
-        </div>
+<div #scrollBox class="scroll-box"  (scroll)="onScroll($event)" [ngStyle]="{'height': style_height }">
 
-        <ng-container
-          *ngTemplateOutlet="itemTemplate; context: { $implicit: item }"
-        />
+  <div #scrollContent cdkDropListGroup [cdkDropGutterSize]="getDropGutterSize()">
+    <ng-template #recursiveList let-items>
+      <div class="cdk-nest-dragdrop-list" cdkDropList [cdkDropListData]="items" (cdkDropListDropped)="drop($event)"
+        (cdkDropListNested)="nest($event)" [cdkDropListConnectedTo]="dropLists" [cdkDropListNestEnabled]="true">
+        <ng-container *ngFor="let item of items">
+          <div *ngIf="item._isEmpty == undefined" cdkDrag class="cdk-nest-dragdrop-item">
+            <div *cdkDragPlaceholder>
+              <ng-container *ngTemplateOutlet="
+                  placeholderTemplate;
+                  context: { $implicit: item }
+                " />
+            </div>
 
-        <div
-          *ngIf="item.children && item.children.length"
-          class="cdk-nest-dragdrop-sublist"
-        >
-          <ng-container
-            *ngTemplateOutlet="
-              recursiveList;
-              context: { $implicit: item.children }
-            "
-          />
-        </div>
+            <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: item }" />
+
+            <div *ngIf="item.children && item.children.length" class="cdk-nest-dragdrop-sublist"
+              [ngStyle]="{ 'padding-top.px': 0 }">
+              <ng-container *ngTemplateOutlet="
+                  recursiveList;
+                  context: { $implicit: item.children }
+                " />
+            </div>
+          </div>
+          <div *ngIf="item._isEmpty == true" class="cdk-nest-dragdrop-item" [ngStyle]="{ 'padding-top.px': 0 }">
+            <div *ngIf="item.children && item.children.length" class="cdk-nest-dragdrop-sublist"
+              [ngStyle]="{ 'padding-top.px': 0 }">
+              <ng-container *ngTemplateOutlet="
+                  recursiveList;
+                  context: { $implicit: item.children }
+                " />
+            </div>
+          </div>
+        </ng-container>
       </div>
-    </div>
-  </ng-template>
-  <ng-container
-    *ngTemplateOutlet="recursiveList; context: { $implicit: itemList }"
-  />
+    </ng-template>
+    <ng-container *ngTemplateOutlet="recursiveList; context: { $implicit: itemTreeList }" />
+  </div>
+
+  <!-- SCROLL GAP BOX -->
+  <div *ngIf="showGap" #scrollGap class="scroll-gap">
+  </div>
 </div>
 
-<!-- 
+<!--
 Copyright 2019 Google Inc. All Rights Reserved.
 Use of this source code is governed by an MIT-style license that
-can be found in the LICENSE file at http://angular.io/license 
+can be found in the LICENSE file at http://angular.io/license
 -->

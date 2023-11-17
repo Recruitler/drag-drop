@@ -84,6 +84,8 @@ export class DropListRef<T = any> {
   nestEnabled: boolean = true;
 
   nestThreshold: number = 0.5;
+
+  dropGutterSize: number = 0;
   // R2M end
 
   /**
@@ -314,9 +316,10 @@ export class DropListRef<T = any> {
 
   // R2M start
   _unnestIfNecessary(item: DragRef): void {
+
     if (item.nestInfo && item.nestInfo.nestIndex !== -1) {
       let targetItem = this._draggables[item.nestInfo.nestIndex];
-      
+
       this._sortStrategy.unnest(item, this._sortStrategy.getItemIndex(targetItem));
       item.nestInfo = null;
     }
@@ -473,6 +476,32 @@ export class DropListRef<T = any> {
     // R2M end
   }
 
+  _isInGutter(
+    item: DragRef,
+    pointerX: number,
+    pointerY: number
+  ): boolean {
+
+    let currentIndex = this._sortStrategy.getItemIndex(item);
+
+    let itemRects = (this._sortStrategy as SingleAxisSortStrategy<DragRef>).getItemBoundaries();
+    let index = itemRects.findIndex((rect, index) => {
+      return index !== currentIndex && Math.floor(rect.top) <= pointerY && Math.floor(rect.bottom) >= pointerY
+    });
+
+    if (this._siblings.indexOf(this) < this.dropGutterSize && index == -1) {
+      const firstDragRect = itemRects[0];
+      if (firstDragRect) {
+        if (pointerY > firstDragRect.top)
+          return true;
+
+      }
+
+    }
+
+    return false;
+  }
+
   /**
    * Checks if an item is inside name field of leaf node of the list
    * returns the index of list into which DragRef item will be nested
@@ -509,10 +538,12 @@ export class DropListRef<T = any> {
 
     let currentIndex = this._sortStrategy.getItemIndex(item);
 
+
+
     // let isVertical = (this._sortStrategy as SingleAxisSortStrategy<DragRef>).orientation === 'vertical';
     let isVertical = true;
     let itemRects = (this._sortStrategy as SingleAxisSortStrategy<DragRef>).getItemBoundaries();
-    
+
     let index = isVertical ? itemRects.findIndex((rect, index) => {
 
       return index !== currentIndex && Math.floor(rect.top) <= pointerY && Math.floor(rect.bottom) >= pointerY
@@ -523,7 +554,7 @@ export class DropListRef<T = any> {
 
     if (index == -1)
       return -1;
-    
+
     if (isVertical && previewRect.x > itemRects[index].left) {
       return this._draggables.indexOf(this._sortStrategy.getActiveItem(index));
 
@@ -781,6 +812,8 @@ export class DropListRef<T = any> {
     // R2M start
     let siblingContainers = this._siblings.filter((sibling) => sibling._canReceive(item, x, y));
 
+    let topContainer = this._siblings[0];
+
     let distMin = -99999;
     let nearestContainer = undefined;
     // find the nearest parent of this container
@@ -793,9 +826,10 @@ export class DropListRef<T = any> {
       }
     }
 
+
+
     return nearestContainer;
     // R2M end
-    // return this._siblings.find((sibling) => sibling._canReceive(item, x, y));
 
 
   }

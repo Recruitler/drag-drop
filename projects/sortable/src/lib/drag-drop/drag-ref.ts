@@ -1160,6 +1160,8 @@ export class DragRef<T = any> {
         this.exited.next({ item: this, container: this._dropContainer! });
         this._dropContainer!.exit(this);
         this._dropContainer!._unnestIfNecessary(this);
+
+
         // Notify the new container that the item has entered.
         this._dropContainer = newContainer!;
         this._dropContainer.enter(
@@ -1198,8 +1200,15 @@ export class DragRef<T = any> {
 
       let previewRect = this._preview.getBoundingClientRect();
 
+      // Checks if draggin element is inside in gutter area set by pagination
+      // Gutter means that non-draggable elements(tree parent node which is hidden) which _isEmpty property of CdkDropDownItem is true
+// R2M start for handle gutter
+      let isInGutter = this._dropContainer?._isInGutter(this, x, y);
 
-
+      if (isInGutter == true) {
+        return ;
+      }
+// R2M end
 
       let nestIndex = this._dropContainer?._getNestIndex(this, x, y, previewRect, this._pointerDirectionDelta);
 

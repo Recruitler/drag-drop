@@ -1,6 +1,7 @@
 <div class="example center">
   <div class="heading">
     <h2>Nested Drag-Drop Component</h2>
+    <input type="radio" />
   </div>
 
   <ng-template #itemTemplate let-item>
@@ -17,6 +18,9 @@
     <div class="example-custom-placeholder"></div>
   </ng-template>
 
+  <!-- PLEASE REMOVE ALL MAT-* COMPONENTS -->
+  <!-- <mat-paginator [pageSizeOptions]="[5, 10, 25, 100]" showFirstLastButtons [length]="totalCount"   (page)="onPageUpdate($event)"></mat-paginator> -->
+
   <div class="example-container" style="position: relative">
     <div
       *ngIf="isLoading"
@@ -25,21 +29,14 @@
       <app-circular-progress />
       <!-- <mat-progress-spinner mode="indeterminate"></mat-progress-spinner> -->
     </div>
-    <nested-drag-drop
-      [cdkNestedDropDownData]="listItems"
-      [cdkPageTotalItem]="totalCount"
-      [cdkPageCurrentIndex]="currentPage"
-      [cdkPageSize]="pageSize"
-      [cdkListItemTemplate]="itemTemplate"
-      [cdkPlaceholderTemplate]="placeholderTemplate"
-      (cdkDragDropped)="onNestDragDropped($event)"
-      (cdkPageChanged)="pageChanged($event)"
-    >
-    </nested-drag-drop>
+    <nested-drag-drop [cdkNestedDropDownData]="listItems" [cdkPageMode]="pageMode"
+    [cdkListItemTemplate]="itemTemplate" [cdkPlaceholderTemplate]="placeholderTemplate"
+    (cdkDragDropped)="onNestDragDropped($event)" style="display: block;">
+  </nested-drag-drop>
   </div>
 </div>
 
-<div class="example center">
+<!-- <div class="example center">
   <div class="heading">
     <h2>Reordering lists</h2>
   </div>
@@ -57,9 +54,9 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
-<div class="example">
+<!-- <div class="example">
   <div class="heading full">
     <h2>Transferring items between lists</h2>
   </div>
@@ -97,9 +94,9 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->
 
-<div class="example">
+<!-- <div class="example">
   <div class="heading full">
     <h2>List orientation</h2>
   </div>
@@ -116,4 +113,4 @@
       </div>
     </div>
   </div>
-</div>
+</div> -->

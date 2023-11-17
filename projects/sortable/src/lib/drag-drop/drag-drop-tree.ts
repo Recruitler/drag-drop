@@ -1,7 +1,8 @@
+import { transferArrayItem } from "./drag-utils";
 
 export interface CdkDropDownItem {
     [key: string]: any; // a CdkDropDownItem will be an unknown data model
-    children?: CdkDropDownItem[]; // we can require `children[]` 
+    children?: CdkDropDownItem[]; // we can require `children[]`
 }
 
 
@@ -19,6 +20,22 @@ export interface CdkIndexTreeNode {
     indexOfList: number,
 
     children?: CdkIndexTreeNode[],
+}
+
+export function getParent(roots: CdkDropDownItem[], children: CdkDropDownItem[]): CdkDropDownItem | undefined {
+    for (const root of roots) {
+        if (root.children) {
+            if ( root.children == children)
+                return root;
+            else {
+                const parent = root.children.length > 0 ?  getParent(root.children, children) : undefined;
+                if (parent !== undefined)
+                    return parent
+            }
+        } 
+    }
+
+    return undefined;
 }
 
 export function getDecendantCount(parent: CdkDropDownItem): number {
@@ -42,7 +59,7 @@ export function getTotalCount(parents: CdkDropDownItem[]): number {
     return count;
 }
 
-export function buildTree(children: CdkDropDownItem[]) : CdkDropDownItem {
+export function buildTree(children: CdkDropDownItem[]): CdkDropDownItem {
     return {
         _isEmpty: true,
         children
@@ -79,6 +96,23 @@ function _traverseCdkIndexTree(root: CdkIndexTreeNode, cb: (node: CdkIndexTreeNo
             _traverseCdkIndexTree(child, cb);
         }
     }
+}
+
+function _getCdkIndexTreeNode(root: CdkIndexTreeNode, index: number): CdkIndexTreeNode | undefined {
+    let node: CdkIndexTreeNode | undefined;
+    if (root.indexOfList == index)
+        return root;
+
+    if (root.children && root.children.length > 0) {
+        for (let child of root.children) {
+
+            if (node = _getCdkIndexTreeNode(child, index)) {
+                return node;
+            }
+        }
+    }
+
+    return undefined;
 }
 
 function _constructCdkIndexTreeNode(node: CdkDropDownItem, index: number, parent?: CdkIndexTreeNode): { indexNode: CdkIndexTreeNode, index: number } {
@@ -133,7 +167,7 @@ function _splitTree(node: CdkIndexTreeNode, startIndex: number, endIndex: number
     let hasReached = false;
 
     if (node.indexOfList < startIndex || node.indexOfList > endIndex)
-        newDropItem._isEmpty = true;
+        newDropItem["_isEmpty"] = true;
     else
         newDropItem = Object.assign({}, node.itemOfList, { children: undefined });
 
@@ -173,4 +207,61 @@ function _splitTree(node: CdkIndexTreeNode, startIndex: number, endIndex: number
     return { newDropItem, hasReached };
 
 
+}
+
+export function swapTreeNodes(tree: CdkIndexTree, sourceIndex: number, targetIndex: number) {
+    const sourceNode = _getCdkIndexTreeNode(tree.root, sourceIndex);
+    const targetNode = _getCdkIndexTreeNode(tree.root, targetIndex);
+
+    if (sourceNode && targetNode) {
+
+
+        let sourceChildren = sourceNode.parent?.itemOfList.children;
+        let targetChildren = targetNode.parent?.itemOfList.children;
+
+
+        if (sourceChildren && targetChildren) {
+
+
+
+            let sourceChildIndex = sourceChildren.indexOf(sourceNode.itemOfList);
+            let targetChildIndex = targetChildren.indexOf(targetNode.itemOfList);
+
+
+
+            sourceChildIndex >= 0 && targetChildIndex >= 0 && transferArrayItem(sourceChildren, targetChildren, sourceChildIndex, targetChildIndex);
+
+        }
+    }
+
+}
+
+export function nestTreeNode(tree: CdkIndexTree, sourceIndex: number, nestIndex: number) {
+    const sourceNode = _getCdkIndexTreeNode(tree.root, sourceIndex);
+    const targetNode = _getCdkIndexTreeNode(tree.root, nestIndex);
+
+    if (sourceNode && targetNode) {
+
+
+        let sourceChildren = sourceNode.parent?.itemOfList.children;
+
+        if (sourceChildren) {
+
+
+
+            let sourceChildIndex = sourceChildren.indexOf(sourceNode.itemOfList);
+
+            // sourceChildIndex >= 0 && targetChildIndex >= 0 && transferArrayItem(sourceChildren, targetChildren, sourceChildIndex, targetChildIndex);
+            const targetItem = targetNode.itemOfList;
+            let targetChildren = targetItem.children ? targetItem.children : [];
+
+            transferArrayItem(
+                sourceChildren,
+                targetChildren,
+                sourceChildIndex,
+                targetChildren.length
+            );
+            targetItem.children = targetChildren;
+        }
+    }
 }
