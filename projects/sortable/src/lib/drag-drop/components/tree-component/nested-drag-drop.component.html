@@ -1,6 +1,6 @@
 <!-- <lib-pagination [pagination]="pagination" [navigate]="false" [loading]="false" (pageUpdate)="onPageUpdate($event)" /> -->
 
-<div #scrollBox class="scroll-box" (scroll)="onScroll($event)" [ngStyle]="{'height': style_height }">
+<div #scrollBox class="scroll-box"  (scroll)="onScroll($event)" [ngStyle]="{'height': style_height }">
 
   <div #scrollContent cdkDropListGroup [cdkDropGutterSize]="getDropGutterSize()">
     <ng-template #recursiveList let-items>
@@ -41,7 +41,7 @@
   </div>
 
   <!-- SCROLL GAP BOX -->
-  <div *ngIf="!hideGap" #scrollGap class="scroll-gap">
+  <div *ngIf="showGap" #scrollGap class="scroll-gap">
   </div>
 </div>
 

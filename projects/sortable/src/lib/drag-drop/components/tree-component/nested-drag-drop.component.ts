@@ -1,9 +1,9 @@
 import { NgFor, NgIf, NgStyle, NgTemplateOutlet } from '@angular/common';
-import { Component, ElementRef, EventEmitter, Input, Output, QueryList, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, QueryList, SimpleChanges, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
 import { asapScheduler } from 'rxjs';
-import { NgClass } from '@angular/common';
-
 import { CdkDragDrop, CdkDragNest, CdkNestDrop } from '../../drag-events';
+
+import { NgClass } from '@angular/common';
 import { CdkDrag } from '../../directives/drag';
 import { CdkDragHandle } from '../../directives/drag-handle';
 import { CdkDragPlaceholder } from '../../directives/drag-placeholder';
@@ -68,6 +68,8 @@ export class CdkNestedDragDropComponent {
     CdkNestDrop
   >();
 
+
+  @Output('cdkScrollNextPage') readonly scrollNextPage: EventEmitter<any> = new EventEmitter<any>();
 
 
   @ViewChild('scrollBox') scrollBox!: ElementRef<HTMLElement>;
@@ -161,25 +163,33 @@ export class CdkNestedDragDropComponent {
 
   }
 
+  isLoading = false;
+
   onScroll(event: Event) {
     if (this.pageMode == 'VIRTUAL-SCROLL') {
-      if (!this.hideGap && this.scrollBox.nativeElement.scrollHeight - this.scrollBox.nativeElement.scrollTop === this.scrollBox.nativeElement.clientHeight) {
-        // this.scrollNextPage.emit(this.currentPage);
+      console.log(this.scrollBox.nativeElement.scrollHeight, this.scrollBox.nativeElement.scrollTop, this.scrollBox.nativeElement.clientHeight)
+      if (!this.isLoading && this.showGap && this.scrollBox.nativeElement.scrollHeight - this.scrollBox.nativeElement.scrollTop <= this.scrollBox.nativeElement.clientHeight + 1) {
+        this.isLoading = true;
+        this.scrollNextPage.emit(event);
+
       }
     }
   }
 
-  hideGap: boolean = true;
+  showGap: boolean = true;
   ngAfterContentChecked() {
     if (this.pageMode == 'VIRTUAL-SCROLL') {
-
-      this.hideGap = false;
+      this.showGap = true;
     } else if (this.pageMode == 'PAGINATION') {
-      this.hideGap = true;
+      this.showGap = false;
     }
 
   }
 
+  ngOnChanges(change: SimpleChanges) {
+    this.isLoading = false;
+  }
+  
 
   constructor() {
   }
