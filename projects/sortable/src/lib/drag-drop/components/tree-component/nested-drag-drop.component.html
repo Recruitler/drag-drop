@@ -15,15 +15,19 @@
                 " />
             </div>
 
-            <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: item }" />
-
-            <div *ngIf="item.children && item.children.length" class="cdk-nest-dragdrop-sublist"
-              [ngStyle]="{ 'padding-top.px': 0 }">
-              <ng-container *ngTemplateOutlet="
-                  recursiveList;
-                  context: { $implicit: item.children }
-                " />
-            </div>
+            @defer (on viewport) {
+                <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: item }" />
+                <div *ngIf="item.children && item.children.length" class="cdk-nest-dragdrop-sublist"
+                  [ngStyle]="{ 'padding-top.px': 0 }">
+                  <ng-container *ngTemplateOutlet="
+                      recursiveList;
+                      context: { $implicit: item.children }
+                    " />
+                </div>
+            } @placeholder {
+                <span>Loading...</span>
+            }
+            
           </div>
           <div *ngIf="item._isEmpty == true" class="cdk-nest-dragdrop-item" [ngStyle]="{ 'padding-top.px': 0 }">
             <div *ngIf="item.children && item.children.length" class="cdk-nest-dragdrop-sublist"

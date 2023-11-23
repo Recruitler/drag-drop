@@ -1,5 +1,5 @@
 import { NgFor, NgIf, NgStyle, NgTemplateOutlet } from '@angular/common';
-import { Component, ElementRef, EventEmitter, Input, Output, QueryList, SimpleChanges, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
+import { Component, ElementRef, EventEmitter, HostListener, Input, Output, QueryList, SimpleChanges, TemplateRef, ViewChild, ViewChildren, ViewEncapsulation } from '@angular/core';
 import { asapScheduler } from 'rxjs';
 import { CdkDragDrop, CdkDragNest, CdkNestDrop } from '../../drag-events';
 
@@ -165,13 +165,13 @@ export class CdkNestedDragDropComponent {
 
   isLoading = false;
 
+  @HostListener('window:scroll', ['$event'])
   onScroll(event: Event) {
     if (this.pageMode == 'VIRTUAL-SCROLL') {
-      console.log(this.scrollBox.nativeElement.scrollHeight, this.scrollBox.nativeElement.scrollTop, this.scrollBox.nativeElement.clientHeight)
-      if (!this.isLoading && this.showGap && this.scrollBox.nativeElement.scrollHeight - this.scrollBox.nativeElement.scrollTop <= this.scrollBox.nativeElement.clientHeight + 1) {
+      if (!this.isLoading && this.showGap && document.scrollingElement && document.scrollingElement?.scrollHeight - document.scrollingElement?.scrollTop <= document.scrollingElement?.clientHeight + 1) {
         this.isLoading = true;
         this.scrollNextPage.emit(event);
-
+        console.log('Event', 'Touch Sroll End');
       }
     }
   }
@@ -187,7 +187,9 @@ export class CdkNestedDragDropComponent {
   }
 
   ngOnChanges(change: SimpleChanges) {
-    this.isLoading = false;
+    setTimeout(()=>{
+      this.isLoading = false;
+    }, 1000);
   }
   
 

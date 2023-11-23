@@ -30,7 +30,7 @@
       <!-- <mat-progress-spinner mode="indeterminate"></mat-progress-spinner> -->
     </div>
     <nested-drag-drop [cdkNestedDropDownData]="listItems" [cdkPageMode]="pageMode"
-    [cdkListItemTemplate]="itemTemplate" [cdkPlaceholderTemplate]="placeholderTemplate"
+    [cdkListItemTemplate]="itemTemplate" [cdkPlaceholderTemplate]="placeholderTemplate" (cdkScrollNextPage)="onScrollNextPage($event)"
     (cdkDragDropped)="onNestDragDropped($event)" style="display: block;">
   </nested-drag-drop>
   </div>

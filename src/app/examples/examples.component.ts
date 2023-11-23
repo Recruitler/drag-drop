@@ -1,5 +1,5 @@
 import { NgFor, NgIf } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {MatPaginatorModule, PageEvent} from '@angular/material/paginator';
 // import {MatProgressSpinnerModule} from '@angular/material';
 // MatProgressSpinnerModule
@@ -51,7 +51,7 @@ import { CircularProgressComponent } from './circular-progressive.component';
   standalone: true,
   styleUrls: ['./examples.component.scss'],
 })
-export class ExamplesComponent {
+export class ExamplesComponent  implements OnInit  {
 
   // Reordering lists example - https://material.angular.io/cdk/drag-drop/overview#reordering-lists
   movies = [
@@ -197,13 +197,32 @@ export class ExamplesComponent {
     },
   ];
 
+  ngOnInit(): void {
+    let items = [];
+    let i, k, subItems = [];
+    for ( i = 0 ; i < 100; i++ ) {
+      subItems = [];
+      for ( k = 0; k < 3; k++ ) {
+        subItems.push({
+          name: `Section ${i+1}.${k+1}`,
+          description: "This is a description about this section",
+        });
+      }
+      items.push({
+        name: `Section ${i+1}`,
+        children: subItems
+      })
+    }
+    this.dropdownTree = items;
+  }
+
   indexTree: CdkIndexTree;
 
   currentPage: number = 0;
 
   totalCount: number = 0;
 
-  pageSize: number = 5;
+  pageSize: number = 10;
 
   listItems: CdkDropDownItem[] = [];
 
@@ -211,8 +230,6 @@ export class ExamplesComponent {
 
   onNestDragDropped(event: CdkNestDrop) {
     console.log('drag&drop event :>> ', event);
-
-
 
   }
 
@@ -236,20 +253,20 @@ export class ExamplesComponent {
 
   }
 
-  onScrollNextPage(event: number) {
+  onScrollNextPage(event: Event) {
     console.log('event :>> ', event);
     this.isLoading = true;
     setTimeout(() => {
-      const page: number = event + 1;
+      // const page: number = this.listItems.length / this.pageSize + 2;
+      this.currentPage = this.currentPage + 1;
+      let page = this.currentPage;
 
       let startIndex = 0;
       let endIndex = Math.min(page * this.pageSize + this.pageSize - 1, this.totalCount - 1);
 
       const splittedTree = splitTree(this.indexTree, startIndex, endIndex);
 
-      splittedTree.children && (this.listItems = splittedTree.children)
-
-      splittedTree.children && (this.currentPage = page);
+      splittedTree.children && splittedTree.children.length > this.listItems.length && (this.listItems = splittedTree.children)
 
       this.isLoading = false;
 
