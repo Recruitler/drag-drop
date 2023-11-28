@@ -144,10 +144,7 @@ export class CdkNestedDragDropComponent {
   }
 
   getDropGutterSize(): number {
-
-
     this.dropGutterSize = 0;
-
     return 0;
   }
 
@@ -187,9 +184,9 @@ export class CdkNestedDragDropComponent {
   }
 
   ngOnChanges(change: SimpleChanges) {
-    setTimeout(()=>{
+    // setTimeout(()=>{
       this.isLoading = false;
-    }, 1000);
+    // }, 1000);
   }
   
 
