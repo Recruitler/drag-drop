@@ -7,7 +7,7 @@
       <div class="cdk-nest-dragdrop-list" cdkDropList [cdkDropListData]="items" (cdkDropListDropped)="drop($event)"
         (cdkDropListNested)="nest($event)" [cdkDropListConnectedTo]="dropLists" [cdkDropListNestEnabled]="true">
         <ng-container *ngFor="let item of items">
-          <div *ngIf="item._isEmpty == undefined" cdkDrag class="cdk-nest-dragdrop-item">
+          <div *ngIf="item._isEmpty == undefined" cdkDrag class="cdk-nest-dragdrop-item" [cdkDragDisabled]="item.draggingDisabled">
             <div *cdkDragPlaceholder>
               <ng-container *ngTemplateOutlet="
                   placeholderTemplate;
