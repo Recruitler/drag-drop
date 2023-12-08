@@ -14,8 +14,15 @@
       </p>
     </div>
   </ng-template>
-  <ng-template #placeholderTemplate>
-    <div class="example-custom-placeholder"></div>
+  <ng-template #placeholderTemplate let-item>
+    <div class="example-custom-placeholder">
+      <p *ngIf="item.name != undefined">
+        <b>{{ item.name }}</b>
+      </p>
+      <p *ngIf="item.description != undefined">
+        {{ item.description + " about " + item.name }}
+      </p>
+    </div>
   </ng-template>
 
   <!-- PLEASE REMOVE ALL MAT-* COMPONENTS -->

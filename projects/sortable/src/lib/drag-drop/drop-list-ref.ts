@@ -21,6 +21,7 @@ import { DragCSSStyleDeclaration } from './dom/styling';
 import { DropListSortStrategy } from './sorting/drop-list-sort-strategy';
 import { SingleAxisSortStrategy } from './sorting/single-axis-sort-strategy';
 import { CdkDrag, CdkDropList } from './public-api';
+import { getTransformTransitionDurationInMs } from './dom/transition-duration';
 
 /**
  * Proximity, as a ratio to width/height, at which a
@@ -464,9 +465,10 @@ export class DropListRef<T = any> {
    */
   _nestItem(item: DragRef, nestIndex: number): void {
     let targetItem = this._draggables[nestIndex];
-    // if (item.getPlaceholderElement().checkVisibility())
-
+    
     this._sortStrategy.nest(item, this._sortStrategy.getItemIndex(targetItem), item.nestInfo ? item.nestInfo.nestIndex : -1);
+    this._animatePlaceholder(item);
+
 
     this.nested.next({
       item,
@@ -475,6 +477,8 @@ export class DropListRef<T = any> {
     });
     // R2M end
   }
+
+  
 
   _isInGutter(
     item: DragRef,
@@ -602,12 +606,24 @@ export class DropListRef<T = any> {
     );
 
     if (result) {
+      this._animatePlaceholder(item);
       this.sorted.next({
         previousIndex: result.previousIndex,
         currentIndex: result.currentIndex,
         container: this,
         item,
       });
+    }
+  }
+
+  _animatePlaceholder(item: DragRef
+  ) {
+    const afterRect = item.getPlaceholderElement().getBoundingClientRect();
+    if ( item.animPlaceholder) {
+      item.animPlaceholder.style.left = `${afterRect.x + window.scrollX}px`;
+      item.animPlaceholder.style.top = `${afterRect.y + window.scrollY}px`;
+      item.animPlaceholder.style.width = `${afterRect.width}px`;
+      item.animPlaceholder.style.height = `${afterRect.height}px`;
     }
   }
 

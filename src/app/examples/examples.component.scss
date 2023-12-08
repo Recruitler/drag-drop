@@ -36,24 +36,14 @@ h4 {
     border: none;
 }
 
-.example-list.cdk-drop-list-dragging .example-box:not(.cdk-drag-placeholder) {
-    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-/* Animate items as they're being sorted. */
-.cdk-drop-list-dragging .cdk-drag {
-    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
-}
-
-/* Animate an item that has been dropped. */
-.cdk-drag-animating {
-    transition: transform 300ms cubic-bezier(0, 0, 0.2, 1);
-}
-
 // END CDK STYLES
 
 
 
+.cdk-nest-dragdrop-item {
+    padding: 5px;
+    border: #000000 ;
+}
 
 .example {
     display: flex;

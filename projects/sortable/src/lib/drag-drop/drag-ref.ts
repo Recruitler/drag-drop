@@ -316,6 +316,9 @@ export class DragRef<T = any> {
   // R2M start
   nestInfo: DragNestInfo | null | undefined;
 
+  /** HTML Element for placeholder transition */
+  animPlaceholder: HTMLElement | undefined;
+
   // R2M end
 
   /** Whether starting to drag this element is disabled. */
@@ -709,7 +712,9 @@ export class DragRef<T = any> {
   private _destroyPlaceholder() {
     this._placeholder?.remove();
     this._placeholderRef?.destroy();
+    this.animPlaceholder?.remove();
     this._placeholder = this._placeholderRef = null!;
+    this.animPlaceholder = undefined;
   }
 
   /** Handler for the `mousedown`/`touchstart` events. */
@@ -902,6 +907,7 @@ export class DragRef<T = any> {
       const parent = element.parentNode as HTMLElement;
       const placeholder = (this._placeholder =
         this._createPlaceholderElement());
+
       const anchor = (this._anchor =
         this._anchor || this._document.createComment(''));
 
@@ -926,6 +932,17 @@ export class DragRef<T = any> {
       this._document.body.appendChild(
         parent.replaceChild(placeholder, element)
       );
+      const initialRect = placeholder.getBoundingClientRect();
+      this.animPlaceholder = deepCloneNode(placeholder);
+      this.animPlaceholder.style.position = "absolute";
+      this.animPlaceholder.style.left = `${initialRect.x + window.scrollX}px`;
+      this.animPlaceholder.style.top = `${initialRect.y + window.scrollY}px`;
+      this.animPlaceholder.style.width = `${initialRect.width}px`;
+      this.animPlaceholder.style.height = `${initialRect.height}px`;
+      this.animPlaceholder.classList.add('cdk-drag-placeholder');
+      this.animPlaceholder.classList.remove('cdk-drag-placeholder-hidden');
+      this._document.body.appendChild(this.animPlaceholder);
+
       this._getPreviewInsertionPoint(parent, shadowRoot).appendChild(
         this._preview
       );
@@ -1374,7 +1391,8 @@ export class DragRef<T = any> {
     // Stop pointer events on the preview so the user can't
     // interact with it while the preview is animating.
     placeholder.style.pointerEvents = 'none';
-    placeholder.classList.add('cdk-drag-placeholder');
+    placeholder.classList.add('cdk-drag-placeholder-hidden');
+
     return placeholder;
   }
 

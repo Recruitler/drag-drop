@@ -202,14 +202,14 @@ export class ExamplesComponent  implements OnInit  {
     let i, k, subItems = [];
     for ( i = 0 ; i < 100; i++ ) {
       subItems = [];
-      for ( k = 0; k < 3; k++ ) {
+      for ( k = 0; k < 0; k++ ) {
         let item : any = {
           name: `Section ${i+1}.${k+1}`,
           description: "This is a description about this section",
         };
-        if ( i % 2 == 0 ) {
-          item = {...item, draggingDisabled: true }
-        }
+        // if ( i % 2 == 0 ) {
+        //   item = {...item, draggingDisabled: true }
+        // }
         subItems.push(item);
       }
       items.push({
