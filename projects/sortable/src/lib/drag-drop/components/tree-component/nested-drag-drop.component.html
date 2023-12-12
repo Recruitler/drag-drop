@@ -1,56 +1,60 @@
 <!-- <lib-pagination [pagination]="pagination" [navigate]="false" [loading]="false" (pageUpdate)="onPageUpdate($event)" /> -->
 
-<div #scrollBox class="scroll-box"  (scroll)="onScroll($event)" [ngStyle]="{'height': style_height }">
-
+<div #scrollBox class="scroll-box" (scroll)="onScroll($event)" [ngStyle]="{ height: style_height }">
   <div #scrollContent cdkDropListGroup [cdkDropGutterSize]="getDropGutterSize()">
     <ng-template #recursiveList let-items>
-      <div class="cdk-nest-dragdrop-list" cdkDropList [cdkDropListData]="items" (cdkDropListDropped)="drop($event)"
-        (cdkDropListNested)="nest($event)" [cdkDropListConnectedTo]="dropLists" [cdkDropListNestEnabled]="true">
-        <ng-container *ngFor="let item of items">
-          <div *ngIf="item._isEmpty == undefined" cdkDrag class="cdk-nest-dragdrop-item" [cdkDragDisabled]="item.draggingDisabled">
-            <div *cdkDragPlaceholder>
-              <ng-container *ngTemplateOutlet="
-                  placeholderTemplate;
-                  context: { $implicit: item }
-                " />
-            </div>
-
-            @defer (on viewport) {
-              @defer(on idle){
-                <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: item }" />
+      <div
+        class="cdk-nest-dragdrop-list"
+        cdkDropList
+        [cdkDropListData]="items"
+        (cdkDropListDropped)="drop($event)"
+        (cdkDropListNested)="nest($event)"
+        [cdkDropListConnectedTo]="dropLists"
+        [cdkDropListNestEnabled]="true">
+        @for (item of items; track item.id) {  
+          @if (item._isEmpty == undefined) {  
+            <div cdkDrag class="cdk-nest-dragdrop-item" [cdkDragDisabled]="item.draggingDisabled">
+              <div *cdkDragPlaceholder>
+                <ng-container *ngTemplateOutlet="placeholderTemplate;context: { $implicit: item }" />
+              </div>
+  
+              @defer (on viewport) { 
+                @defer(on idle) {
+                  <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: item }" />
+                } @placeholder {
+                  <span>Loading...</span>
+                } 
               } @placeholder {
                 <span>Loading...</span>
               }
-            } @placeholder {
-                <span>Loading...</span>
-            }
-            <div *ngIf="item.children && item.children.length" class="cdk-nest-dragdrop-sublist"
-              [ngStyle]="{ 'padding-top.px': 0 }">
-              <ng-container *ngTemplateOutlet="
-                  recursiveList;
-                  context: { $implicit: item.children }
-                " />
-            </div>            
-            
-          </div>
-          <div *ngIf="item._isEmpty == true" class="cdk-nest-dragdrop-item" [ngStyle]="{ 'padding-top.px': 0 }">
-            <div *ngIf="item.children && item.children.length" class="cdk-nest-dragdrop-sublist"
-              [ngStyle]="{ 'padding-top.px': 0 }">
-              <ng-container *ngTemplateOutlet="
-                  recursiveList;
-                  context: { $implicit: item.children }
-                " />
+  
+              @if (item.children && !!item.children.length) {
+                <div class="cdk-nest-dragdrop-sublist" [ngStyle]="{ 'padding-top.px': 0 }">
+                  <ng-container *ngTemplateOutlet="recursiveList; context: { $implicit: item.children } " />
+                </div>
+              }
             </div>
-          </div>
-        </ng-container>
+          }
+  
+          @if (item._isEmpty) {  
+            <div class="cdk-nest-dragdrop-item" [ngStyle]="{ 'padding-top.px': 0 }">
+              @if (item.children && !!item.children.length) {
+                <div class="cdk-nest-dragdrop-sublist" [ngStyle]="{ 'padding-top.px': 0 }">
+                  <ng-container *ngTemplateOutlet="recursiveList; context: { $implicit: item.children } " />
+                </div>
+              }
+            </div>
+          }
+        }
       </div>
     </ng-template>
     <ng-container *ngTemplateOutlet="recursiveList; context: { $implicit: itemTreeList }" />
   </div>
 
   <!-- SCROLL GAP BOX -->
-  <div *ngIf="showGap" #scrollGap class="scroll-gap">
-  </div>
+  @if (showGap) {
+    <div #scrollGap class="scroll-gap"></div>
+  }
 </div>
 
 <!--
