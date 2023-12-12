@@ -7,7 +7,6 @@ import {
   Input,
   Output,
   QueryList,
-  SimpleChanges,
   TemplateRef,
   ViewChild,
   ViewChildren,
@@ -34,9 +33,7 @@ import { CdkDropDownItem, getParent } from '../../drag-drop-tree';
 // unused?
 const TAG = 'nested-drag-drop.component.ts';
 
-/**
- * @value Drag&Drop connected sorting group
- */
+// Drag&Drop connected sorting group
 @Component({
   selector: 'nested-drag-drop',
   templateUrl: './nested-drag-drop.component.html',
@@ -59,31 +56,20 @@ const TAG = 'nested-drag-drop.component.ts';
   encapsulation: ViewEncapsulation.None,
 })
 export class CdkNestedDragDropComponent {
-  @Input('cdkNestedDropDownData')
-  itemTreeList: CdkDropDownItem[] = [];
-
-  @Input('cdkListItemTemplate')
-  itemTemplate!: TemplateRef<any>;
-
-  @Input('cdkPlaceholderTemplate')
-  placeholderTemplate!: TemplateRef<any>;
-
+  @Input('cdkNestedDropDownData')itemTreeList: CdkDropDownItem[] = [];
+  @Input('cdkListItemTemplate')itemTemplate!: TemplateRef<any>;
+  @Input('cdkPlaceholderTemplate')placeholderTemplate!: TemplateRef<any>;
   @Input('cdkPageMode') pageMode: IPageMode = 'PAGINATION';
-
   @Input('height') style_height: string = '100%';
 
-  @Output('cdkDragDropped') readonly dropped: EventEmitter<CdkNestDrop> =
-    new EventEmitter<CdkNestDrop>();
-
-  @Output('cdkScrollNextPage') readonly scrollNextPage: EventEmitter<any> =
-    new EventEmitter<any>();
+  @Output('cdkDragDropped') readonly dropped: EventEmitter<CdkNestDrop> =new EventEmitter<CdkNestDrop>();
+  @Output('cdkScrollNextPage') readonly scrollNextPage: EventEmitter<any> =new EventEmitter<any>();
 
   @ViewChild('scrollBox') scrollBox!: ElementRef<HTMLElement>;
   @ViewChild('scrollGap') scrollGap!: ElementRef<HTMLElement>;
   @ViewChild('scrollContent') scrollContent!: ElementRef<HTMLElement>;
 
-  @ViewChildren(CdkDropList)
-  private dlq: QueryList<CdkDropList>;
+  @ViewChildren(CdkDropList) private dlq: QueryList<CdkDropList>;
 
   dropLists: CdkDropList[] = [];
   dropGutterSize = 0;
