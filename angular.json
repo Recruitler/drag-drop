@@ -65,10 +65,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "drag-drop:build:production"
+              "buildTarget": "drag-drop:build:production"
             },
             "development": {
-              "browserTarget": "drag-drop:build:development"
+              "buildTarget": "drag-drop:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -76,7 +76,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "drag-drop:build"
+            "buildTarget": "drag-drop:build"
           }
         },
         "test": {
