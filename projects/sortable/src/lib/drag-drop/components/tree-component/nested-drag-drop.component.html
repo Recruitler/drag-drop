@@ -12,7 +12,7 @@
         [cdkDropListConnectedTo]="dropLists"
         [cdkDropListNestEnabled]="true">
         @for (item of items; track item.id) {  
-          @if (item._isEmpty == undefined) {  
+          @if (item?._isEmpty == undefined) {  
             <div cdkDrag class="cdk-nest-dragdrop-item" [cdkDragDisabled]="item.draggingDisabled">
               <div *cdkDragPlaceholder>
                 <ng-container *ngTemplateOutlet="placeholderTemplate;context: { $implicit: item }" />
@@ -36,7 +36,7 @@
             </div>
           }
   
-          @if (item._isEmpty) {  
+          @if (item?._isEmpty) {  
             <div class="cdk-nest-dragdrop-item" [ngStyle]="{ 'padding-top.px': 0 }">
               @if (item.children && !!item.children.length) {
                 <div class="cdk-nest-dragdrop-sublist" [ngStyle]="{ 'padding-top.px': 0 }">
