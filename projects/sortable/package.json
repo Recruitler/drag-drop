@@ -1,6 +1,6 @@
 {
   "name": "@recruitler/drag-drop",
-  "version": "0.1.22",
+  "version": "0.1.24",
   "description": "A forked version of Angular/'s drag-drop CDK.",
   "license": "MIT",
   "author": "Recruitler",
@@ -10,18 +10,18 @@
     "packagr": "ng-packagr -p ng-package.json"
   },
   "peerDependencies": {
-    "@angular/cdk": "^17.2.2",
-    "@angular/common": "^17.3.0",
-    "@angular/core": "^17.3.0",
+    "@angular/cdk": "^18.0.2",
+    "@angular/common": "^18.0.2",
+    "@angular/core": "^18.0.2",
     "rxjs": "~7.8.0"
   },
   "dependencies": {
-    "tslib": "^2.3.0"
+    "tslib": "^2.6.3"
   },
   "sideEffects": false,
   "devDependencies": {
-    "@angular-devkit/build-angular": "^17.2.3",
-    "@angular/cli": "^17.2.3",
-    "ng-packagr": "^17.3.0"
+    "@angular-devkit/build-angular": "^18.0.2",
+    "@angular/cli": "^18.0.3",
+    "ng-packagr": "^18.0.2"
   }
 } 
