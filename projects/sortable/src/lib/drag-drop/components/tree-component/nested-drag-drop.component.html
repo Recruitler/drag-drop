@@ -11,7 +11,7 @@
         (cdkDropListNested)="nest($event)"
         [cdkDropListConnectedTo]="dropLists"
         [cdkDropListNestEnabled]="true">
-        @for (item of items; track item.id) {  
+        @for (item of items; let i = $index; track 'key' + i) {  
           @if (item?._isEmpty == undefined) {  
             <div cdkDrag class="cdk-nest-dragdrop-item" [cdkDragDisabled]="item.draggingDisabled">
               <div *cdkDragPlaceholder>

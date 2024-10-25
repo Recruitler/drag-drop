@@ -170,7 +170,6 @@ export class CdkNestedDragDropComponent {
         isNesting: false,
       });
       // END OF SENDING MESSAGE
-
       transferArrayItem(prevListData, curListData, previousIndex, currentIndex);
     }
   }
