@@ -1,6 +1,6 @@
 {
   "name": "@recruitler/drag-drop",
-  "version": "19.0.2",
+  "version": "19.0.0",
   "description": "A forked version of Angular/'s drag-drop CDK.",
   "license": "MIT",
   "author": "Recruitler",
