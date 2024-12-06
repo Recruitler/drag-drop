@@ -932,16 +932,6 @@ export class DragRef<T = any> {
       this._document.body.appendChild(
         parent.replaceChild(placeholder, element)
       );
-      const initialRect = placeholder.getBoundingClientRect();
-      this.animPlaceholder = deepCloneNode(placeholder);
-      this.animPlaceholder.style.position = "absolute";
-      this.animPlaceholder.style.left = `${initialRect.x + window.scrollX}px`;
-      this.animPlaceholder.style.top = `${initialRect.y + window.scrollY}px`;
-      this.animPlaceholder.style.width = `${initialRect.width}px`;
-      this.animPlaceholder.style.height = `${initialRect.height}px`;
-      this.animPlaceholder.classList.add('cdk-drag-placeholder');
-      this.animPlaceholder.classList.remove('cdk-drag-placeholder-hidden');
-      this._document.body.appendChild(this.animPlaceholder);
 
       this._getPreviewInsertionPoint(parent, shadowRoot).appendChild(
         this._preview

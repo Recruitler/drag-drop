@@ -4,7 +4,12 @@
   "description": "A forked version of Angular/'s drag-drop CDK.",
   "license": "MIT",
   "author": "Recruitler",
-  "keywords": ["angular", "cdk", "drag-drop", "nesting"],
+  "keywords": [
+    "angular",
+    "cdk",
+    "drag-drop",
+    "nesting"
+  ],
   "scripts": {
     "ng": "ng",
     "packagr": "ng-packagr -p ng-package.json"
@@ -24,4 +29,4 @@
     "@angular/cli": "^19.0.0",
     "ng-packagr": "^19.0.0"
   }
-} 
+}

@@ -160,9 +160,9 @@ export class ExamplesComponent implements OnInit {
     let items = [];
     let i, k, subItems = [];
 
-    for (i = 0; i < 100; i++) {
+    for (i = 0; i < this.dropdownTree.length; i++) {
       subItems = [];
-      for (k = 0; k < 0; k++) {
+      for (k = 0; k < (this.dropdownTree[i].children?.length || 0); k++) {
         let item: any = {
           name: `Section ${i + 1}.${k + 1}`,
           description: 'This is a description about this section',
@@ -179,6 +179,7 @@ export class ExamplesComponent implements OnInit {
     }
     this.dropdownTree = items;
   }
+
 
   ngAfterContentInit() {
     const tree = buildTree(this.dropdownTree);
