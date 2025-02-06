@@ -10,16 +10,17 @@
       [cdkPlaceholderTemplate]="placeholderTemplate"
       (cdkScrollNextPage)="onScrollNextPage($event)"
       (cdkDragDropped)="onNestDragDropped($event)"
-      style="display: block"
-    >
-    </cdk-nested-drag-drop>
+      style="display: block; height: 400px"
+     />
   </div>
 </div>
 
 <!-- Item Template -->
 <ng-template #itemTemplate let-item>
   <div class="example-item-name">
-    <p><b>{{ item.name }}</b></p>
+    <p>
+      <b>{{ item.name }}</b>
+    </p>
     @if (item.description) {
       <p>{{ item.description }}</p>
     }
@@ -28,7 +29,5 @@
 
 <!-- Placeholder Template -->
 <ng-template #placeholderTemplate>
-  <div class="example-box placeholder">
-    Drop here
-  </div>
+  <div class="example-box placeholder">Drop here</div>
 </ng-template>
