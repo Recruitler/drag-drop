@@ -92,6 +92,33 @@ Now when you make changes to the CDK source code, you just need to rebuild the C
 
 This setup allows you to develop and test the nested drag-drop functionality while working directly with the local CDK source code.
 
+## The Job
+We need to add our work to the official dra-drop CDK package so that the Angular team can maintain it instead of us.
 
+Clone the CDK repository into this repo's structure:
 
+components
+├── angular
+│   └── src
+│       ├── cdk
+│       │   ├── drag-drop
+│       │   │   ├── drag-events.ts
+│       │   │   ├── drag-ref.ts
+│       │   │   ├── drop-list-ref.ts
+│       │   │   ├── sorting
+│       │   │   │   └── single-axis-sort-strategy.ts
+│       │   │   ├── tree
+│       │   │   │   └── tree.md
+│       │   │   └── types.ts
+
+This branch has unsuccessfully migrated my work from:
+`https://github.com/Recruitler/drag-drop/tree/main/projects/sortable/src/lib/drag-drop/components/tree-component`
+
+Here's the forked Angular CDK repo I used: `feat/drag-drop-nesting`
+But you'll need to start over:
+
+Remove pagination 
+migrate drag-drop functionalty 
+from projects/sortable/src/lib/drag-drop
+to components/src/cdk/drag-drop
 
